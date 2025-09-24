@@ -1,6 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nb.Tolls", "Nb.Tolls\Nb.Tolls.csproj", "{56FEEAAB-1434-470A-B87B-DCCFEA1C822E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nb.Tolls.Domain", "Nb.Tolls.Domain\Nb.Tolls.Domain.csproj", "{E969B1C0-FA09-4221-98AB-8404381CFD55}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nb.Tolls.Application", "Nb.Tolls.Application\Nb.Tolls.Application.csproj", "{C718D7E1-66B2-4637-B0F9-FF94053B6969}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nb.Tolls.Infrastructure", "Nb.Tolls.Infrastructure\Nb.Tolls.Infrastructure.csproj", "{1D6F36C5-818F-4E78-8710-11B4A929913E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nb.Tolls.WebApi.Host", "Nb.Tolls.WebApi.Host\Nb.Tolls.WebApi.Host.csproj", "{930E719E-C899-4FAD-8EBC-C3FCAFFFD01C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nb.Tolls.WebApi.Models", "Nb.Tolls.WebApi.Models\Nb.Tolls.WebApi.Models.csproj", "{0FB89F73-8E3C-499D-BA59-E8495A4E851C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -8,9 +16,25 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{56FEEAAB-1434-470A-B87B-DCCFEA1C822E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{56FEEAAB-1434-470A-B87B-DCCFEA1C822E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{56FEEAAB-1434-470A-B87B-DCCFEA1C822E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{56FEEAAB-1434-470A-B87B-DCCFEA1C822E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E969B1C0-FA09-4221-98AB-8404381CFD55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E969B1C0-FA09-4221-98AB-8404381CFD55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E969B1C0-FA09-4221-98AB-8404381CFD55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E969B1C0-FA09-4221-98AB-8404381CFD55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C718D7E1-66B2-4637-B0F9-FF94053B6969}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C718D7E1-66B2-4637-B0F9-FF94053B6969}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C718D7E1-66B2-4637-B0F9-FF94053B6969}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C718D7E1-66B2-4637-B0F9-FF94053B6969}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D6F36C5-818F-4E78-8710-11B4A929913E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D6F36C5-818F-4E78-8710-11B4A929913E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D6F36C5-818F-4E78-8710-11B4A929913E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D6F36C5-818F-4E78-8710-11B4A929913E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{930E719E-C899-4FAD-8EBC-C3FCAFFFD01C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{930E719E-C899-4FAD-8EBC-C3FCAFFFD01C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{930E719E-C899-4FAD-8EBC-C3FCAFFFD01C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{930E719E-C899-4FAD-8EBC-C3FCAFFFD01C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FB89F73-8E3C-499D-BA59-E8495A4E851C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FB89F73-8E3C-499D-BA59-E8495A4E851C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FB89F73-8E3C-499D-BA59-E8495A4E851C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FB89F73-8E3C-499D-BA59-E8495A4E851C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
