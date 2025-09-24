@@ -7,6 +7,6 @@ public static class TollMapper
 {
     public static TollResponse Map(TollResult result)
     {
-        throw new NotImplementedException();
+        return new TollResponse { TollCost = result.TollCost };
     }
 }

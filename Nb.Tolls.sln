@@ -10,6 +10,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nb.Tolls.WebApi.Host", "Nb.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nb.Tolls.WebApi.Models", "Nb.Tolls.WebApi.Models\Nb.Tolls.WebApi.Models.csproj", "{0FB89F73-8E3C-499D-BA59-E8495A4E851C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{70D1BA9F-81F4-4390-8461-B23AE938ADC5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nb.Tolls.Application.UnitTests", "Nb.Tolls.Application.UnitTests\Nb.Tolls.Application.UnitTests.csproj", "{CAC0974F-2A96-4908-86D0-333E1A5B893A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nb.Tolls.WebApi.Host.UnitTests", "Nb.Tolls.WebApi.Host.UnitTests\Nb.Tolls.WebApi.Host.UnitTests.csproj", "{75B8BD9B-26D9-4EE8-A3FC-EA8423FBE612}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nb.Tolls.WebApi.IntegrationTests", "Nb.Tolls.WebApi.IntegrationTests\Nb.Tolls.WebApi.IntegrationTests.csproj", "{09FD6A08-2655-446F-8956-3630282B6A67}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +44,22 @@ Global
 		{0FB89F73-8E3C-499D-BA59-E8495A4E851C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0FB89F73-8E3C-499D-BA59-E8495A4E851C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0FB89F73-8E3C-499D-BA59-E8495A4E851C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAC0974F-2A96-4908-86D0-333E1A5B893A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAC0974F-2A96-4908-86D0-333E1A5B893A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAC0974F-2A96-4908-86D0-333E1A5B893A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAC0974F-2A96-4908-86D0-333E1A5B893A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75B8BD9B-26D9-4EE8-A3FC-EA8423FBE612}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75B8BD9B-26D9-4EE8-A3FC-EA8423FBE612}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75B8BD9B-26D9-4EE8-A3FC-EA8423FBE612}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75B8BD9B-26D9-4EE8-A3FC-EA8423FBE612}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09FD6A08-2655-446F-8956-3630282B6A67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09FD6A08-2655-446F-8956-3630282B6A67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09FD6A08-2655-446F-8956-3630282B6A67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09FD6A08-2655-446F-8956-3630282B6A67}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CAC0974F-2A96-4908-86D0-333E1A5B893A} = {70D1BA9F-81F4-4390-8461-B23AE938ADC5}
+		{75B8BD9B-26D9-4EE8-A3FC-EA8423FBE612} = {70D1BA9F-81F4-4390-8461-B23AE938ADC5}
+		{09FD6A08-2655-446F-8956-3630282B6A67} = {70D1BA9F-81F4-4390-8461-B23AE938ADC5}
 	EndGlobalSection
 EndGlobal
