@@ -5,5 +5,5 @@ namespace Nb.Tolls.WebApi.Host.Validators;
 
 public interface ITollRequestValidator
 {
-    ModelStateDictionary ValidateTollTimes(TollRequest request);
+    ModelStateDictionary ValidateTollTimes(DateTimeOffset[] request);
 }

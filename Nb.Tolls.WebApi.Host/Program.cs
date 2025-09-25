@@ -3,9 +3,9 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Nb.Tolls.Application.Registrations;
+using Nb.Tolls.Infrastructure.Registrations;
 
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services
     .AddControllers()
     .AddJsonOptions(o =>
@@ -15,3 +15,4 @@ builder.Services
     });
 
 builder.Services.AddTollsApplication();
+builder.Services.AddTollsInfrastructure();
