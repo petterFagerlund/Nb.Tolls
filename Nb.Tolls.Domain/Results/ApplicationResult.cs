@@ -21,6 +21,17 @@ public class ApplicationResult
         Result = data,
         ApplicationResultStatus = ApplicationResultStatus.Success
     };
+    
+    public static ApplicationResult<TResult> WithNotFound<TResult>(TResult data) => new()
+    {
+        Result = data,
+        ApplicationResultStatus = ApplicationResultStatus.NotFound
+    };
+    
+    public static ApplicationResult<TResult> NotFound<TResult>(string message) => new()
+    {
+        Messages = [message], ApplicationResultStatus = ApplicationResultStatus.NotFound
+    };
 }
 
 
