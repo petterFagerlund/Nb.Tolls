@@ -14,7 +14,16 @@
     <ItemGroup>
       <ProjectReference Include="..\Nb.Tolls.Application\Nb.Tolls.Application.csproj" />
       <ProjectReference Include="..\Nb.Tolls.Domain\Nb.Tolls.Domain.csproj" />
+      <ProjectReference Include="..\Nb.Tolls.Infrastructure\Nb.Tolls.Infrastructure.csproj" />
       <ProjectReference Include="..\Nb.Tolls.WebApi.Models\Nb.Tolls.WebApi.Models.csproj" />
     </ItemGroup>
+
+  <ItemGroup> 
+    <None 
+      Include="..\Nb.Tolls.Infrastructure\Data\TollFees.json" 
+      Link="Data\TollFees.json" 
+      CopyToOutputDirectory="PreserveNewest" 
+    /> 
+  </ItemGroup>
 
 </Project>
