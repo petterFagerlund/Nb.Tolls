@@ -5,10 +5,10 @@ namespace Nb.Tolls.Domain.Results;
 
 public class ApplicationResult
 {
-    public string[] Messages { get; init; } = Array.Empty<string>();
+    public string[] Messages { get; private init; } = Array.Empty<string>();
 
-    public ApplicationResultStatus ApplicationResultStatus { get; set; }
-    public bool IsSuccessful => ApplicationResultStatus == ApplicationResultStatus.Success;
+    public ApplicationResultStatus ApplicationResultStatus { get; private init; }
+    protected bool IsSuccessful => ApplicationResultStatus == ApplicationResultStatus.Success;
     
     public static ApplicationResult<TResult> WithError<TResult>(string message) => new()
     {

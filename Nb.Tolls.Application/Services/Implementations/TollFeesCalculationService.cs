@@ -6,12 +6,12 @@ namespace Nb.Tolls.Application.Services.Implementations;
 
 public class TollFeesCalculationService : ITollFeesCalculationService
 {
-    private readonly ITollFeeRepository _tollFeeRepository;
+    private readonly ITollFeesRepository _tollFeesRepository;
     private readonly ILogger<TollFeesCalculationService> _logger;
 
-    public TollFeesCalculationService(ITollFeeRepository tollFeeRepository, ILogger<TollFeesCalculationService> logger)
+    public TollFeesCalculationService(ITollFeesRepository tollFeesRepository, ILogger<TollFeesCalculationService> logger)
     {
-        _tollFeeRepository = tollFeeRepository;
+        _tollFeesRepository = tollFeesRepository;
         _logger = logger;
     }
 
@@ -135,7 +135,7 @@ public class TollFeesCalculationService : ITollFeesCalculationService
         var tollFees = new List<TollTimeFeeResult>();
         foreach (var tollTime in orderedTollTimes)
         {
-            var result = _tollFeeRepository.GetTollFee(tollTime);
+            var result = _tollFeesRepository.GetTollFee(tollTime);
             if (!result.IsSuccessful || result.Result == null)
             {
                 _logger.LogError(

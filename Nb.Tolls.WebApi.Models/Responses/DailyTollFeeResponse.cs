@@ -2,6 +2,6 @@
 
 public class DailyTollFeeResponse
 {
-    public required DateOnly Date { get; init; }
-    public required decimal Fee { get; set; }
+    public required DateOnly TollDate { get; init; }
+    public required decimal TollFee { get; init; }
 }

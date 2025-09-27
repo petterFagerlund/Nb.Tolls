@@ -2,5 +2,5 @@
 
 public class TollFeesResult
 {
-    public required List<DailyTollFeeResult> TollFees { get; set; }
+    public required List<DailyTollFeeResult> TollFees { get; init; }
 }

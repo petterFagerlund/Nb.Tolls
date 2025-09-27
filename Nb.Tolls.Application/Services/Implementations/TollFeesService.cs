@@ -38,11 +38,11 @@ public class TollFeesService : ITollFeesService
                 _logger.LogInformation("No toll times provided.");
                 return ApplicationResult.NotFound<TollFeesResult>("No toll times provided.");
             }
-
+            
             var tollTimesUtc = tollTimes
                 .Select(dateTimeOffset => dateTimeOffset.UtcDateTime)
                 .ToList();
-
+            
             var eligibleTollFeeTimes = await _tollTimeService.GetEligibleTollFeeTimes(tollTimesUtc);
             if (eligibleTollFeeTimes.Count == 0)
             {

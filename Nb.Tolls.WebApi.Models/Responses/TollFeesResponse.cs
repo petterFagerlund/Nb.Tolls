@@ -2,5 +2,5 @@
 
 public class TollFeesResponse
 {
-    public required List<DailyTollFeeResponse> TollFees { get; init; } = new();
+    public required List<DailyTollFeeResponse> TollFees { get; init; } = [];
 }
