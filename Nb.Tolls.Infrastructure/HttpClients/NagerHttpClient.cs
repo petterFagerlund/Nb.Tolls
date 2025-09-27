@@ -18,37 +18,40 @@ public class NagerHttpClient : INagerHttpClient
         _cache = cache;
     }
 
-    
-    //Todo: Clean up and add better logging 
     public async Task<bool> IsPublicHolidayAsync(DateOnly date, CancellationToken ct = default)
     {
         var year = date.Year;
         var holidays = await GetHolidaysForYearAsync(year, ct).ConfigureAwait(false);
-        return holidays.Contains(date.ToString("yyyy-MM-dd"));
+        return holidays != null && holidays.Contains(date.ToString("yyyy-MM-dd"));
     }
 
-    private async Task<HashSet<string>> GetHolidaysForYearAsync(int year, CancellationToken ct)
+    private async Task<HashSet<string>?> GetHolidaysForYearAsync(int year, CancellationToken ct)
     {
         var cacheKey = $"nager:SE:{year}";
-        if (_cache.TryGetValue(cacheKey, out HashSet<string> cached))
-            return cached;
+        if (_cache.TryGetValue(cacheKey, out HashSet<string>? cached))
+        {
+            return cached!;
+        }
 
         var url = $"/api/v3/PublicHolidays/{year}/SE";
-        using var resp = await _http.GetAsync(url, ct).ConfigureAwait(false);
+        using var httpResponseMessage = await _http.GetAsync(url, ct).ConfigureAwait(false);
 
-        if (!resp.IsSuccessStatusCode)
+        if (!httpResponseMessage.IsSuccessStatusCode)
         {
+            _logger.LogError(
+                "Failed to fetch public holidays from Nager API. Status Code: {StatusCode}",
+                httpResponseMessage.StatusCode);
             var empty = new HashSet<string>();
             _cache.Set(cacheKey, empty, TimeSpan.FromMinutes(1));
             return empty;
         }
 
-        var json = await resp.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-        using var doc = JsonDocument.Parse(json);
+        var json = await httpResponseMessage.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+        using var jsonDocument = JsonDocument.Parse(json);
         var set = new HashSet<string>();
-        foreach (var el in doc.RootElement.EnumerateArray())
+        foreach (var jsonElement in jsonDocument.RootElement.EnumerateArray())
         {
-            if (el.TryGetProperty("date", out var dateProp))
+            if (jsonElement.TryGetProperty("date", out var dateProp))
             {
                 set.Add(dateProp.GetString()!);
             }

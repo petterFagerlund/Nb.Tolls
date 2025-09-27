@@ -13,8 +13,8 @@ public static class TollFeesMapper
         {
             response.TollFees.Add(new DailyTollFeeResponse
             {
-                Date = tollFee.Date,
-                Fee = tollFee.TollFee
+                TollDate = tollFee.Date,
+                TollFee = tollFee.TollFee
             });
         }
 

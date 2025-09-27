@@ -19,11 +19,9 @@
     </ItemGroup>
 
   <ItemGroup> 
-    <None 
-      Include="..\Nb.Tolls.Infrastructure\Data\TollFees.json" 
-      Link="Data\TollFees.json" 
-      CopyToOutputDirectory="PreserveNewest" 
-    /> 
+    <None Include="..\Nb.Tolls.Infrastructure\Data\TollFeesData.json" CopyToOutputDirectory="PreserveNewest">
+      <Link>Data\TollFeesData.json</Link>
+    </None> 
   </ItemGroup>
 
 </Project>

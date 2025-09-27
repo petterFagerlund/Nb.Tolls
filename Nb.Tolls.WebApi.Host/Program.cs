@@ -1,29 +1,42 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 using Nb.Tolls.Application.Registrations;
 using Nb.Tolls.Infrastructure.Registrations;
 using Nb.Tolls.WebApi.Host.Validators;
 using Nb.Tolls.WebApi.Host.Validators.Implementation;
 
-var builder = WebApplication.CreateBuilder(args);
-builder.Services
-    .AddControllers()
-    .AddJsonOptions(o =>
+namespace Nb.Tolls.WebApi.Host;
+
+public class Program
+{
+    public static void Main(string[] args)
     {
-        o.JsonSerializerOptions.Converters.Add(
-            new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false));
-    });
+        var builder = WebApplication.CreateBuilder(args);
+        
+        builder.Configuration
+            .SetBasePath(builder.Environment.ContentRootPath)
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+            .AddEnvironmentVariables();
 
-builder.Services.AddScoped<ITollRequestValidator, TollRequestValidator>();
-builder.Services.AddTollsApplication();
-builder.Services.AddTollsInfrastructure();
+        builder.Services
+            .AddControllers()
+            .AddJsonOptions(o =>
+            {
+                o.JsonSerializerOptions.Converters.Add(
+                    new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false));
+            });
 
-builder.Services.AddControllers();
+        builder.Services.AddScoped<ITollRequestValidator, TollRequestValidator>();
+        builder.Services.AddTollsApplication();
+        builder.Services.AddTollsInfrastructure(builder.Configuration);
 
-var app = builder.Build();
+        builder.Services.AddControllers();
 
-app.MapControllers();
+        var app = builder.Build();
 
-app.Run();
+        app.MapControllers();
+
+        app.Run();
+    }
+}

@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.Mvc;
 using Nb.Tolls.Application.Services;
 using Nb.Tolls.WebApi.Host.Mappers;
 using Nb.Tolls.WebApi.Host.Validators;
@@ -11,16 +9,16 @@ namespace Nb.Tolls.WebApi.Host.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class TollController : ApiControllerBase
+public class TollFeeController : ApiControllerBase
 {
     private readonly ITollRequestValidator _tollRequestValidator;
     private readonly ITollFeesService _tollFeesService;
-    private readonly ILogger<TollController> _logger;
+    private readonly ILogger<TollFeeController> _logger;
 
-    public TollController(
+    public TollFeeController(
         ITollRequestValidator tollRequestValidator,
         ITollFeesService tollFeesService,
-        ILogger<TollController> logger) : base(logger)
+        ILogger<TollFeeController> logger) : base(logger)
     {
         _tollRequestValidator = tollRequestValidator;
         _tollFeesService = tollFeesService;
@@ -32,17 +30,17 @@ public class TollController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetTollFees([FromBody] TollRequest request)
+    public async Task<IActionResult> GetTollFees([FromBody] TollFeesRequest feesRequest)
     {
         try
         {
-            _tollRequestValidator.ValidateTollTimes(request.TollTimes);
+            _tollRequestValidator.ValidateTollTimes(feesRequest.TollTimes);
             if (!ModelState.IsValid)
             {
                 return ValidationProblem(ModelState);
             }
 
-            var applicationResult = await _tollFeesService.GetTollFees(request.VehicleType, request.TollTimes);
+            var applicationResult = await _tollFeesService.GetTollFees(feesRequest.VehicleType, feesRequest.TollTimes);
             if (!applicationResult.IsSuccessful)
             {
                 return MapErrorResponse(applicationResult);

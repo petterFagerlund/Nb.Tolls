@@ -9,14 +9,14 @@ namespace Nb.Tolls.Application.UnitTests.Services;
 
 public class TollFeesCalculationServiceTests
 {
-    private readonly ITollFeeRepository _tollFeeRepository;
+    private readonly ITollFeesRepository _tollFeesRepository;
     private readonly TollFeesCalculationService _sut;
 
     public TollFeesCalculationServiceTests()
     {
         var logger = A.Fake<ILogger<TollFeesCalculationService>>();
-        _tollFeeRepository = A.Fake<ITollFeeRepository>();
-        _sut = new TollFeesCalculationService(_tollFeeRepository, logger);
+        _tollFeesRepository = A.Fake<ITollFeesRepository>();
+        _sut = new TollFeesCalculationService(_tollFeesRepository, logger);
     }
 
     [Fact]
@@ -101,9 +101,9 @@ public class TollFeesCalculationServiceTests
         var dateTwo = new DateTime(2025, 9, 25, 7, 0, 0);
         var input = new[] { date, dateTwo };
 
-        A.CallTo(() => _tollFeeRepository.GetTollFee(date))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 0m }));
-        A.CallTo(() => _tollFeeRepository.GetTollFee(dateTwo))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(dateTwo))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 0m }));
 
         // Act
@@ -113,9 +113,9 @@ public class TollFeesCalculationServiceTests
         Assert.False(result.IsSuccessful);
         Assert.Null(result.Result);
 
-        A.CallTo(() => _tollFeeRepository.GetTollFee(date))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeeRepository.GetTollFee(dateTwo))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(dateTwo))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -125,11 +125,11 @@ public class TollFeesCalculationServiceTests
         var date = new DateTime(2025, 9, 25, 6, 0, 0);
         var input = new[] { date, date.AddMinutes(15), date.AddHours(1) };
 
-        A.CallTo(() => _tollFeeRepository.GetTollFee(input[0]))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(input[0]))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 0m }));
-        A.CallTo(() => _tollFeeRepository.GetTollFee(input[1]))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(input[1]))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 25m }));
-        A.CallTo(() => _tollFeeRepository.GetTollFee(input[2]))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(input[2]))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 45m }));
 
         // Act
@@ -140,11 +140,11 @@ public class TollFeesCalculationServiceTests
         var day = Assert.Single(result.Result.TollFees);
         Assert.Equal(60m, day.TollFee);
 
-        A.CallTo(() => _tollFeeRepository.GetTollFee(input[0]))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(input[0]))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeeRepository.GetTollFee(input[1]))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(input[1]))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeeRepository.GetTollFee(input[2]))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(input[2]))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -170,7 +170,7 @@ public class TollFeesCalculationServiceTests
         var dateTwo = new DateTime(2025, 9, 25, 8, 0, 0);
         var input = new[] { date, dateTwo };
 
-        A.CallTo(() => _tollFeeRepository.GetTollFee(date))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
             .Returns(ApplicationResult.WithError<TollFeeResult>("boom"));
 
         // Act
@@ -179,7 +179,7 @@ public class TollFeesCalculationServiceTests
         // Assert
         Assert.False(result.IsSuccessful);
         Assert.Null(result.Result);
-        A.CallTo(() => _tollFeeRepository.GetTollFee(dateTwo)).MustNotHaveHappened();
+        A.CallTo(() => _tollFeesRepository.GetTollFee(dateTwo)).MustNotHaveHappened();
     }
 
     [Fact]
@@ -189,11 +189,11 @@ public class TollFeesCalculationServiceTests
         var date = new DateTime(2025, 9, 25, 6, 0, 0);
         var input = new[] { date, date.AddMinutes(30), date.AddHours(2) };
 
-        A.CallTo(() => _tollFeeRepository.GetTollFee(input[0]))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(input[0]))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 20m }));
-        A.CallTo(() => _tollFeeRepository.GetTollFee(input[1]))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(input[1]))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 25m }));
-        A.CallTo(() => _tollFeeRepository.GetTollFee(input[2]))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(input[2]))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 30m }));
 
         // Act
@@ -205,11 +205,11 @@ public class TollFeesCalculationServiceTests
         var day = Assert.Single(result.Result.TollFees);
         Assert.Equal(new DateOnly(2025, 9, 25), day.Date);
         Assert.Equal(60m, day.TollFee);
-        A.CallTo(() => _tollFeeRepository.GetTollFee(input[0]))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(input[0]))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeeRepository.GetTollFee(input[1]))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(input[1]))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeeRepository.GetTollFee(input[2]))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(input[2]))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -222,11 +222,11 @@ public class TollFeesCalculationServiceTests
 
         var input = new[] { date, dateWithDifferentTime, dateThree };
 
-        A.CallTo(() => _tollFeeRepository.GetTollFee(date))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 10m }));
-        A.CallTo(() => _tollFeeRepository.GetTollFee(dateWithDifferentTime))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(dateWithDifferentTime))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 15m }));
-        A.CallTo(() => _tollFeeRepository.GetTollFee(dateThree))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(dateThree))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 40m }));
 
         // Act
@@ -241,11 +241,11 @@ public class TollFeesCalculationServiceTests
 
         Assert.Equal(25m, day1.TollFee);
         Assert.Equal(40m, day2.TollFee);
-        A.CallTo(() => _tollFeeRepository.GetTollFee(date))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeeRepository.GetTollFee(dateWithDifferentTime))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(dateWithDifferentTime))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeeRepository.GetTollFee(dateThree))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(dateThree))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -269,11 +269,11 @@ public class TollFeesCalculationServiceTests
         var baseDate = new DateTime(2025, 9, 25, 8, 0, 0);
         var times = new[] { baseDate, baseDate.AddMinutes(30), baseDate.AddMinutes(45) };
 
-        A.CallTo(() => _tollFeeRepository.GetTollFee(baseDate))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(baseDate))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 10m }));
-        A.CallTo(() => _tollFeeRepository.GetTollFee(baseDate.AddMinutes(30)))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(baseDate.AddMinutes(30)))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 20m }));
-        A.CallTo(() => _tollFeeRepository.GetTollFee(baseDate.AddMinutes(45)))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(baseDate.AddMinutes(45)))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 15m }));
 
         //Act
@@ -283,11 +283,11 @@ public class TollFeesCalculationServiceTests
         Assert.True(result.IsSuccessful);
         var day = Assert.Single(result.Result.TollFees);
         Assert.Equal(45m, day.TollFee);
-        A.CallTo(() => _tollFeeRepository.GetTollFee(baseDate))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(baseDate))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeeRepository.GetTollFee(baseDate.AddMinutes(30)))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(baseDate.AddMinutes(30)))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeeRepository.GetTollFee(baseDate.AddMinutes(45)))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(baseDate.AddMinutes(45)))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -298,11 +298,11 @@ public class TollFeesCalculationServiceTests
         var date = new DateTime(2025, 9, 25, 8, 0, 0);
         var times = new[] { date, date.AddMinutes(40), date.AddMinutes(70) };
 
-        A.CallTo(() => _tollFeeRepository.GetTollFee(date))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 10m }));
-        A.CallTo(() => _tollFeeRepository.GetTollFee(date.AddMinutes(40)))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(date.AddMinutes(40)))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 25m }));
-        A.CallTo(() => _tollFeeRepository.GetTollFee(date.AddMinutes(70)))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(date.AddMinutes(70)))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 15m }));
 
         //Act
@@ -312,11 +312,11 @@ public class TollFeesCalculationServiceTests
         Assert.True(result.IsSuccessful);
         var day = Assert.Single(result.Result.TollFees);
         Assert.Equal(50m, day.TollFee);
-        A.CallTo(() => _tollFeeRepository.GetTollFee(date))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeeRepository.GetTollFee(date.AddMinutes(40)))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(date.AddMinutes(40)))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeeRepository.GetTollFee(date.AddMinutes(70)))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(date.AddMinutes(70)))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -334,7 +334,7 @@ public class TollFeesCalculationServiceTests
         foreach (var time in times)
         {
             var fee = time.Minute % 60 == 30 || time.Minute % 60 == 40 ? 20m : 10m;
-            A.CallTo(() => _tollFeeRepository.GetTollFee(time))
+            A.CallTo(() => _tollFeesRepository.GetTollFee(time))
                 .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = fee }));
         }
 
@@ -345,7 +345,7 @@ public class TollFeesCalculationServiceTests
         Assert.True(result.IsSuccessful);
         var day = Assert.Single(result.Result.TollFees);
         Assert.Equal(60m, day.TollFee);
-        A.CallTo(() => _tollFeeRepository.GetTollFee(A<DateTime>._))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(A<DateTime>._))
             .MustHaveHappenedANumberOfTimesMatching(x => x == times.Length);
     }
 
@@ -357,11 +357,11 @@ public class TollFeesCalculationServiceTests
         var dayTwo = new DateTime(2025, 9, 26, 7, 0, 0);
         var times = new[] { dayOne, dayOne.AddMinutes(30), dayTwo };
 
-        A.CallTo(() => _tollFeeRepository.GetTollFee(dayOne))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(dayOne))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 10m }));
-        A.CallTo(() => _tollFeeRepository.GetTollFee(dayOne.AddMinutes(30)))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(dayOne.AddMinutes(30)))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 20m }));
-        A.CallTo(() => _tollFeeRepository.GetTollFee(dayTwo))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(dayTwo))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 15m }));
 
         //Act
@@ -376,11 +376,11 @@ public class TollFeesCalculationServiceTests
 
         Assert.Equal(30m, dayOneResult.TollFee);
         Assert.Equal(15m, dayTwoResult.TollFee);
-        A.CallTo(() => _tollFeeRepository.GetTollFee(dayOne))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(dayOne))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeeRepository.GetTollFee(dayOne.AddMinutes(30)))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(dayOne.AddMinutes(30)))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeeRepository.GetTollFee(dayTwo))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(dayTwo))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -389,7 +389,7 @@ public class TollFeesCalculationServiceTests
     {
         //Arrange
         var date = new DateTime(2025, 9, 25, 8, 0, 0);
-        A.CallTo(() => _tollFeeRepository.GetTollFee(date))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
             .Returns(ApplicationResult.WithError<TollFeeResult>("boom"));
 
         //Act
@@ -397,7 +397,7 @@ public class TollFeesCalculationServiceTests
 
         //Assert
         Assert.False(result.IsSuccessful);
-        A.CallTo(() => _tollFeeRepository.GetTollFee(date))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -420,7 +420,7 @@ public class TollFeesCalculationServiceTests
     {
         // Arrange
         var tollTime = DateTime.UtcNow;
-        A.CallTo(() => _tollFeeRepository.GetTollFee(tollTime))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(tollTime))
             .Returns(ApplicationResult.WithError<TollFeeResult>("Repository failure"));
 
         var list = new List<DateTime> { tollTime };
@@ -440,10 +440,10 @@ public class TollFeesCalculationServiceTests
         var tollTime1 = DateTime.UtcNow;
         var tollTime2 = tollTime1.AddMinutes(30);
 
-        A.CallTo(() => _tollFeeRepository.GetTollFee(tollTime1))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(tollTime1))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 10m }));
 
-        A.CallTo(() => _tollFeeRepository.GetTollFee(tollTime2))
+        A.CallTo(() => _tollFeesRepository.GetTollFee(tollTime2))
             .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 20m }));
 
         var list = new List<DateTime> { tollTime1, tollTime2 };
