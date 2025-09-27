@@ -2,6 +2,7 @@ using System.Data;
 using Microsoft.Extensions.Logging;
 using Nb.Tolls.Application.Repositories;
 using System.Globalization;
+using System.Reflection;
 using System.Text.Json;
 using Microsoft.Extensions.Hosting;
 using Nb.Tolls.Domain.Results;
@@ -16,7 +17,8 @@ public class TollFeeRepository : ITollFeeRepository
     public TollFeeRepository(IHostEnvironment env, ILogger<TollFeeRepository> logger)
     {
         _logger = logger;
-        var path = Path.Combine(env.ContentRootPath, "Data", "TollFees.json");
+        var assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        var path = Path.Combine(assemblyFolder, "Data", "TollFees.json");
 
         if (!File.Exists(path))
         {

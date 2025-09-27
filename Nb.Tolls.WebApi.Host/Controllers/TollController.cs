@@ -9,6 +9,8 @@ using Nb.Tolls.WebApi.Models.Responses;
 
 namespace Nb.Tolls.WebApi.Host.Controllers;
 
+[ApiController]
+[Route("api/[controller]")]
 public class TollController : ApiControllerBase
 {
     private readonly ITollRequestValidator _tollRequestValidator;
