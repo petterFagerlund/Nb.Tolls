@@ -39,7 +39,6 @@ public class TollFeesService : ITollFeesService
                 return ApplicationResult.NotFound<TollFeesResult>("No toll times provided.");
             }
 
-            //todo: consider timezone handling throughout the application
             var tollTimesUtc = tollTimes
                 .Select(dateTimeOffset => dateTimeOffset.UtcDateTime)
                 .ToList();
