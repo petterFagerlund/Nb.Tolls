@@ -12,6 +12,7 @@ public static class ServiceCollectionsExtension
         services.AddTransient<ITollFeesService, TollFeesService>();
         services.AddTransient<ITollDateService, TollDateService>();
         services.AddTransient<ITollTimeService, TollTimeService>();
+        services.AddTransient<ITollFeesCalculationService, TollFeesCalculationService>();
         return services;
     }
 }

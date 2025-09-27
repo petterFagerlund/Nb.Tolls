@@ -2,7 +2,7 @@
 
 public interface ITollTimeService
 {
-    Task<List<DateTimeOffset>> ExtractEligibleTollFeeTimes(List<DateTimeOffset> tollTimes);
-    IReadOnlyList<DateTimeOffset> ExtractNonOverlappingTollTimes(List<DateTimeOffset> tollTimes);
-    IReadOnlyList<DateTimeOffset> ExtractOverlappingTollTimes(List<DateTimeOffset> tollTimes);
+    Task<List<DateTime>> GetEligibleTollFeeTimes(List<DateTime> tollTimes);
+    IReadOnlyList<DateTime> GetNonOverlappingTollTimes(List<DateTime> tollTimes);
+    IReadOnlyList<DateTime> GetOverlappingTollTimes(List<DateTime> tollTimes);
 }

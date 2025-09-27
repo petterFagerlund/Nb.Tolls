@@ -14,9 +14,9 @@ public class TollDateService : ITollDateService
         _nagerHttpClient = nagerHttpClient;
     }
     
-    public async Task<bool> IsTollFreeDateAsync(DateTimeOffset timestamp)
+    public async Task<bool> IsTollFreeDateAsync(DateTime timestamp)
     {
-        var date = DateOnly.FromDateTime(timestamp.UtcDateTime);
+        var date = DateOnly.FromDateTime(timestamp);
         return await IsTollFreeCalendarDateAsync(date);
     }
 

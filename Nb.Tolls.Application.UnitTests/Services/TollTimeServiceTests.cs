@@ -19,7 +19,7 @@ public class TollTimeServiceTests
     }
 
     [Fact]
-    public async Task ExtractEligibleTollFeeTimes_Filters_TollFreeDates_And_Times()
+    public async Task GetEligibleTollFeeTimes_Filters_TollFreeDates_And_Times()
     {
         // Arrange
         var sunday = new DateTimeOffset(2025, 9, 28, 12, 0, 0, TimeSpan.Zero);
@@ -27,26 +27,34 @@ public class TollTimeServiceTests
         var late = new DateTimeOffset(2025, 9, 25, 19, 30, 0, TimeSpan.Zero);
         var ok = new DateTimeOffset(2025, 9, 25, 8, 0, 0, TimeSpan.Zero);
 
-        var input = new List<DateTimeOffset> { sunday, early, late, ok };
-        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(sunday))
+        var input = new List<DateTime> { sunday.UtcDateTime, early.UtcDateTime, late.UtcDateTime, ok.UtcDateTime };
+        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(sunday.UtcDateTime))
             .Returns(true);
-        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(early))
+        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(early.UtcDateTime))
             .Returns(true);
-        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(late))
+        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(late.UtcDateTime))
             .Returns(true);
-        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(ok))
+        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(ok.UtcDateTime))
             .Returns(false);
-        
+
         // Act
-        var result = await _sut.ExtractEligibleTollFeeTimes(input);
+        var result = await _sut.GetEligibleTollFeeTimes(input);
 
         // Assert
         Assert.Single(result);
         Assert.Equal(ok, result[0]);
+        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(sunday.UtcDateTime))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(early.UtcDateTime))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(late.UtcDateTime))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(ok.UtcDateTime))
+            .MustHaveHappenedOnceExactly();
     }
 
     [Fact]
-    public async void ExtractEligibleTollFeeTimes_ReturnsEmpty_When_AllAreTollFree()
+    public async void GetEligibleTollFeeTimes_ReturnsEmpty_When_AllAreTollFree()
     {
         var input = new List<DateTimeOffset>
         {
@@ -54,27 +62,29 @@ public class TollTimeServiceTests
             new(2025, 9, 25, 5, 59, 0, TimeSpan.Zero),
             new(2025, 9, 25, 19, 45, 0, TimeSpan.Zero)
         };
-        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(A<DateTimeOffset>._))
+        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(A<DateTime>._))
             .Returns(true);
 
-        var result = await _sut.ExtractEligibleTollFeeTimes(input);
+        var result = await _sut.GetEligibleTollFeeTimes(input.Select(d => d.UtcDateTime).ToList());
 
         Assert.Empty(result);
+        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(A<DateTime>._))
+            .MustHaveHappenedANumberOfTimesMatching(i => i == 3);
     }
 
 
     [Fact]
-    public void ExtractNonOverlappingTollTimes_Keeps_First_And_Every_60_Minutes_OrMore()
+    public void GetNonOverlappingTollTimes_Keeps_First_And_Every_60_Minutes_OrMore()
     {
         var date = new DateTimeOffset(2025, 9, 25, 8, 0, 0, TimeSpan.Zero);
         var dateTwo = date.AddMinutes(30);
         var dateThree = date.AddMinutes(60);
         var dateFour = date.AddMinutes(130);
 
-        var input = new List<DateTimeOffset> { date, dateTwo, dateThree, dateFour };
+        var input = new List<DateTime> { date.UtcDateTime, dateTwo.UtcDateTime, dateThree.UtcDateTime, dateFour.UtcDateTime };
 
         // Act
-        var result = _sut.ExtractNonOverlappingTollTimes(input);
+        var result = _sut.GetNonOverlappingTollTimes(input);
 
         // Assert
         Assert.Equal(3, result.Count);
@@ -84,45 +94,49 @@ public class TollTimeServiceTests
     }
 
     [Fact]
-    public void ExtractNonOverlappingTollTimes_EmptyInput_ReturnsEmpty()
+    public void GetNonOverlappingTollTimes_EmptyInput_ReturnsEmpty()
     {
-        var result = _sut.ExtractNonOverlappingTollTimes([]);
+        var result = _sut.GetNonOverlappingTollTimes([]);
         Assert.Empty(result);
     }
 
     [Fact]
-    public void ExtractOverlappingTollTimes_Returns_Only_Those_Within_60_Minutes_Of_Anchor()
+    public void GetOverlappingTollTimes_Returns_Only_Those_Within_60_Minutes_Of_Anchor()
     {
-        var anchor = new DateTimeOffset(2025, 9, 25, 8, 0, 0, TimeSpan.Zero);
-        var within = anchor.AddMinutes(30);
-        var outside1 = anchor.AddMinutes(65);
-        var outside2 = outside1.AddMinutes(65);
+        var firstTollInWindow = new DateTimeOffset(2025, 9, 25, 8, 0, 0, TimeSpan.Zero);
+        var secondToll = firstTollInWindow.AddMinutes(30);
+        var thirdToll = firstTollInWindow.AddMinutes(65);
+        var fourthToll = thirdToll.AddMinutes(65);
 
-        var input = new List<DateTimeOffset> { anchor, within, outside1, outside2 };
+        var input = new List<DateTime>
+        {
+            firstTollInWindow.UtcDateTime, secondToll.UtcDateTime, thirdToll.UtcDateTime, fourthToll.UtcDateTime
+        };
 
         // Act
-        var result = _sut.ExtractOverlappingTollTimes(input);
+        var result = _sut.GetOverlappingTollTimes(input);
 
         // Assert
-        Assert.Single(result);
-        Assert.Equal(within, result[0]);
+        Assert.True(result.Count == 2);
+        Assert.Equal(secondToll, result[1]);
+        Assert.Equal(firstTollInWindow, result[0]);
     }
 
     [Fact]
-    public void ExtractOverlappingTollTimes_Exactly60Minutes_IsNotOverlapping()
+    public void GetOverlappingTollTimes_Exactly60Minutes_IsNotOverlapping()
     {
         var anchor = new DateTimeOffset(2025, 9, 25, 8, 0, 0, TimeSpan.Zero);
         var exactly60 = anchor.AddMinutes(60);
 
-        var result = _sut.ExtractOverlappingTollTimes([anchor, exactly60]);
+        var result = _sut.GetOverlappingTollTimes([anchor.UtcDateTime, exactly60.UtcDateTime]);
 
         Assert.Empty(result);
     }
 
     [Fact]
-    public void ExtractOverlappingTollTimes_EmptyInput_ReturnsEmpty()
+    public void GetOverlappingTollTimes_EmptyInput_ReturnsEmpty()
     {
-        var result = _sut.ExtractOverlappingTollTimes([]);
+        var result = _sut.GetOverlappingTollTimes([]);
         Assert.Empty(result);
     }
 
@@ -135,9 +149,9 @@ public class TollTimeServiceTests
     [InlineData(19, 30, true)]
     public void IsTollFreeTime_ReturnsExpected(int hour, int minute, bool expected)
     {
-        var date = new DateTimeOffset(2025, 9, 25, hour, minute, 0, TimeSpan.Zero);
+        var date = new DateTime(2025, 9, 25, hour, minute, 0);
 
-        var isFree = _sut.IsTollFreeTime(date);
+        var isFree = TollTimeService.IsTollFreeTime(date);
 
         Assert.Equal(expected, isFree);
     }

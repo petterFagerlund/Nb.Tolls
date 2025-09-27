@@ -7,15 +7,21 @@ public class TollTimeService : ITollTimeService
     private readonly ITollDateService _tollDateService;
     private readonly ILogger<TollTimeService> _logger;
 
-    public TollTimeService(ITollDateService tollDateService,ILogger<TollTimeService> logger)
+    public TollTimeService(ITollDateService tollDateService, ILogger<TollTimeService> logger)
     {
         _tollDateService = tollDateService;
         _logger = logger;
     }
 
-    public async Task<List<DateTimeOffset>> ExtractEligibleTollFeeTimes(List<DateTimeOffset> tollTimes)
+    public async Task<List<DateTime>> GetEligibleTollFeeTimes(List<DateTime> tollTimes)
     {
-        var result = new List<DateTimeOffset>();
+        if (tollTimes.Count == 0)
+        {
+            _logger.LogError("No toll times provided.");
+            return [];
+        }
+        
+        var result = new List<DateTime>();
         foreach (var tollTime in tollTimes)
         {
             var isTollFreeDate = await _tollDateService.IsTollFreeDateAsync(tollTime);
@@ -36,50 +42,78 @@ public class TollTimeService : ITollTimeService
         return result;
     }
 
-    public IReadOnlyList<DateTimeOffset> ExtractNonOverlappingTollTimes(List<DateTimeOffset> tollTimes)
+    public IReadOnlyList<DateTime> GetNonOverlappingTollTimes(List<DateTime> tollTimes)
     {
-        var result = new List<DateTimeOffset>();
-        DateTimeOffset? lastKept = null;
-
-        foreach (var tollTime in tollTimes)
+        if (tollTimes.Count == 0)
         {
-            if (lastKept is null || tollTime - lastKept.Value >= TimeSpan.FromMinutes(60))
+            _logger.LogError("No toll times provided.");
+            return Array.Empty<DateTime>();
+        }
+
+        var orderedTollTimes = tollTimes.OrderBy(dateTime => dateTime).ToList();
+        var nonOverlappingTollsTimes = new List<DateTime>();
+        DateTime? lastIncludedToll  = null;
+
+        foreach (var currentTollTime in orderedTollTimes)
+        {
+            if (lastIncludedToll  is null)
             {
-                result.Add(tollTime);
-                lastKept = tollTime;
+                lastIncludedToll  = currentTollTime;
+                nonOverlappingTollsTimes.Add(currentTollTime);
+            }
+            else if (currentTollTime - lastIncludedToll  >= TimeSpan.FromMinutes(60))
+            {
+                nonOverlappingTollsTimes.Add(currentTollTime);
+                lastIncludedToll  = currentTollTime;
             }
         }
 
-        return result;
+        if (nonOverlappingTollsTimes.Count == 1 && orderedTollTimes.Max() - orderedTollTimes.Min() < TimeSpan.FromMinutes(60))
+        {
+            return Array.Empty<DateTime>();
+        }
+
+        return nonOverlappingTollsTimes;
     }
 
-    public IReadOnlyList<DateTimeOffset> ExtractOverlappingTollTimes(List<DateTimeOffset> tollTimes)
+    public IReadOnlyList<DateTime> GetOverlappingTollTimes(List<DateTime> tollTimes)
     {
-        var result = new List<DateTimeOffset>();
-        DateTimeOffset? anchor = null;
-
-        foreach (var tollTime in tollTimes)
+        if (tollTimes.Count == 0)
         {
-            if (anchor is null)
+            _logger.LogError("No toll times provided.");
+            return Array.Empty<DateTime>();
+        }
+        
+        var overlappingTolls = new List<DateTime>();
+        DateTime? firstTollInWindow = null;
+
+        foreach (var currentTollTime in tollTimes.OrderBy(dateTime => dateTime))
+        {
+            if (firstTollInWindow is null)
             {
-                anchor = tollTime;
+                firstTollInWindow = currentTollTime;
                 continue;
             }
 
-            if (tollTime - anchor.Value < TimeSpan.FromMinutes(60))
+            if (currentTollTime - firstTollInWindow.Value < TimeSpan.FromMinutes(60))
             {
-                result.Add(tollTime);
+                if (!overlappingTolls.Contains(firstTollInWindow.Value))
+                {
+                    overlappingTolls.Add(firstTollInWindow.Value);
+                }
+
+                overlappingTolls.Add(currentTollTime);
             }
             else
             {
-                anchor = tollTime;
+                firstTollInWindow = currentTollTime;
             }
         }
 
-        return result;
+        return overlappingTolls;
     }
-    
-    internal bool IsTollFreeTime(DateTimeOffset tollTime)
+
+    internal static bool IsTollFreeTime(DateTime tollTime)
     {
         var hour = tollTime.Hour;
         var minute = tollTime.Minute;

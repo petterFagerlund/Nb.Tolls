@@ -14,7 +14,7 @@ public static class TollFeesMapper
             response.TollFees.Add(new DailyTollFeeResponse
             {
                 Date = tollFee.Date,
-                Fee = tollFee.Fee
+                Fee = tollFee.TollFee
             });
         }
 
