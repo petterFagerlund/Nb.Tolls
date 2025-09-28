@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Nb.Tolls.Infrastructure.Models;
 
@@ -19,8 +18,8 @@ public class TollFeesConfigurationLoader : ITollFeesConfigurationLoader
 
     public IReadOnlyList<TollFeesModel> LoadFromDataFolder()
     {
-        var assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
-        var path = Path.Combine(assemblyFolder, _folder, _filePath);
+        var basePath = AppContext.BaseDirectory;
+        var path = Path.Combine(basePath, _folder, _filePath);
 
         if (!File.Exists(path))
         {
