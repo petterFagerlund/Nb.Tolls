@@ -1,6 +1,6 @@
 ﻿namespace Nb.Tolls.Domain.Results;
 
-public class TollFeesResult
+public class DailyTollFeesResult
 {
     public required List<DailyTollFeeResult> TollFees { get; init; }
 }
