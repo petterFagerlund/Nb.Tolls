@@ -17,4 +17,11 @@
       <ProjectReference Include="..\Nb.Tolls.Application\Nb.Tolls.Application.csproj" />
     </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Data\TollFeesData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+
 </Project>

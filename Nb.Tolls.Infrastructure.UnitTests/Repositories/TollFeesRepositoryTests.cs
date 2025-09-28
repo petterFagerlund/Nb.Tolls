@@ -45,11 +45,11 @@ public class TollFeesRepositoryTests
         var utcTime = TimeZoneInfo.ConvertTimeToUtc(stockholmTime, stockholmTimeZone);
 
         // Act
-        var result = _sut.GetTollFee(utcTime);
+        var result = _sut.GetTollFees(new []{utcTime});
 
         // Assert
         Assert.True(result.IsSuccessful);
-        Assert.Equal(expectedFee, result.Result.TollFee);
+        Assert.Equal(expectedFee, result.Result.First().TollFee);
     }
 
     [Fact]
@@ -61,10 +61,9 @@ public class TollFeesRepositoryTests
         var utcTime = TimeZoneInfo.ConvertTimeToUtc(stockholmTime, stockholmTimeZone);
 
         // Act
-        var result = _sut.GetTollFee(utcTime);
+        var result = _sut.GetTollFees(new []{utcTime});
 
         // Assert
         Assert.Equal(ApplicationResultStatus.NotFound, result.ApplicationResultStatus);
-        Assert.Equal(0, result.Result!.TollFee);
     }
 }

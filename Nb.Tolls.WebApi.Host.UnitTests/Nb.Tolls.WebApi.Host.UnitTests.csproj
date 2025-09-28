@@ -23,4 +23,9 @@
         </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Nb.Tolls.Domain\Nb.Tolls.Domain.csproj" />
+      <ProjectReference Include="..\Nb.Tolls.WebApi.Host\Nb.Tolls.WebApi.Host.csproj" />
+    </ItemGroup>
+
 </Project>

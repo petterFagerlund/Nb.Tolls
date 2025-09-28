@@ -29,7 +29,7 @@ public class ApiControllerBase : ControllerBase
         switch (applicationResult.ApplicationResultStatus)
         {
             case ApplicationResultStatus.NotFound:
-                return NotFound();
+                return NotFound(applicationResult.Messages);
             case ApplicationResultStatus.Forbidden:
                 return Forbid();
             case ApplicationResultStatus.ValidationError:

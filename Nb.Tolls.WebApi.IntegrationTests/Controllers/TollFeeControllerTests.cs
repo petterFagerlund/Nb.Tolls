@@ -49,9 +49,9 @@ public class TollFeeControllerTests
             }
         };
 
-        var applicationResult = new ApplicationResult<TollFeesResult>
+        var applicationResult = new ApplicationResult<DailyTollFeesResult>
         {
-            Result = new TollFeesResult
+            Result = new DailyTollFeesResult
             {
                 TollFees =
                 [

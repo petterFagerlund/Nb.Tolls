@@ -11,16 +11,16 @@ namespace Nb.Tolls.WebApi.Host.Controllers;
 [Route("api/[controller]")]
 public class TollFeeController : ApiControllerBase
 {
-    private readonly ITollRequestValidator _tollRequestValidator;
+    private readonly ITollFeesRequestValidator _tollFeesRequestValidator;
     private readonly ITollFeesService _tollFeesService;
     private readonly ILogger<TollFeeController> _logger;
 
     public TollFeeController(
-        ITollRequestValidator tollRequestValidator,
+        ITollFeesRequestValidator tollFeesRequestValidator,
         ITollFeesService tollFeesService,
         ILogger<TollFeeController> logger) : base(logger)
     {
-        _tollRequestValidator = tollRequestValidator;
+        _tollFeesRequestValidator = tollFeesRequestValidator;
         _tollFeesService = tollFeesService;
         _logger = logger;
     }
@@ -30,17 +30,17 @@ public class TollFeeController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetTollFees([FromBody] TollFeesRequest feesRequest)
+    public async Task<IActionResult> GetTollFees([FromBody] TollFeesRequest tollFeesRequest)
     {
         try
         {
-            _tollRequestValidator.ValidateTollTimes(feesRequest.TollTimes);
+            _tollFeesRequestValidator.ValidateTollTimes(tollFeesRequest.TollTimes);
             if (!ModelState.IsValid)
             {
                 return ValidationProblem(ModelState);
             }
 
-            var applicationResult = await _tollFeesService.GetTollFees(feesRequest.VehicleType, feesRequest.TollTimes);
+            var applicationResult = await _tollFeesService.GetTollFees(tollFeesRequest.VehicleType, tollFeesRequest.TollTimes);
             if (!applicationResult.IsSuccessful)
             {
                 return MapErrorResponse(applicationResult);
@@ -49,18 +49,11 @@ public class TollFeeController : ApiControllerBase
             var result = applicationResult.Result;
             if (result == null)
             {
-                _logger.LogError("TollTimeFeeResult was null despite applicationResultStatus being success");
+                _logger.LogError("TollFeeResult was null despite applicationResultStatus being success");
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
             
-            var tollFees = applicationResult.Result.TollFees;
-            if (tollFees.Count == 0)
-            {
-                _logger.LogError("TollFees list was empty despite applicationResultStatus being success");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-            
-            var response = TollFeesMapper.Map(result);
+            var response = TollFeesResponseMapper.Map(result);
             return Ok(response);
         }
         catch (Exception e)

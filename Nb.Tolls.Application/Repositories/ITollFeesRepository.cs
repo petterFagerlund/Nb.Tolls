@@ -4,5 +4,5 @@ namespace Nb.Tolls.Application.Repositories;
 
 public interface ITollFeesRepository
 {
-    ApplicationResult<TollFeeResult> GetTollFee(DateTime dateTime);
+    ApplicationResult<List<TollFeeResult>> GetTollFees(IEnumerable<DateTime> dateTimes);
 }

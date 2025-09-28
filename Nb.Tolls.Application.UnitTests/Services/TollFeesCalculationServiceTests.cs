@@ -20,13 +20,13 @@ public class TollFeesCalculationServiceTests
     }
 
     [Fact]
-    public void CalculateDailyTollFeeTotals_Should_ReturnEmpty_WhenInputIsEmpty()
+    public void CalculateTollFees_Should_ReturnEmpty_WhenInputIsEmpty()
     {
         // Arrange
-        var tollFees = new List<TollTimeFeeResult>();
+        var tollFees = new List<TollFeeResult>();
 
         // Act
-        var result = _sut.CalculateDailyTollFeeTotals(tollFees);
+        var result = _sut.CalculateTollFees(tollFees);
 
         // Assert
         Assert.NotNull(result);
@@ -34,18 +34,18 @@ public class TollFeesCalculationServiceTests
     }
 
     [Fact]
-    public void CalculateDailyTollFeeTotals_Should_SumTollsPerDay_AndCapAt60()
+    public void CalculateTollFees_Should_SumTollsPerDay_AndCapAt60()
     {
         // Arrange
-        var tollFees = new List<TollTimeFeeResult>
+        var tollFees = new List<TollFeeResult>
         {
-            new() { TollTime = new DateTime(2025, 09, 29, 06, 00, 0), TollFee = 30m },
-            new() { TollTime = new DateTime(2025, 09, 29, 07, 00, 0), TollFee = 40m }, // total would be 70 -> capped at 60
-            new() { TollTime = new DateTime(2025, 09, 30, 08, 00, 0), TollFee = 25m }
+            new() { TollTime = new DateTime(2025, 09, 29, 8, 15, 0), TollFee = 30m },
+            new() { TollTime = new DateTime(2025, 09, 29, 12, 15, 0), TollFee = 40m },
+            new() { TollTime = new DateTime(2025, 09, 30), TollFee = 25m }
         };
 
         // Act
-        var result = _sut.CalculateDailyTollFeeTotals(tollFees);
+        var result = _sut.CalculateTollFees(tollFees);
 
         // Assert
         Assert.Equal(2, result.TollFees.Count);
@@ -58,17 +58,17 @@ public class TollFeesCalculationServiceTests
     }
 
     [Fact]
-    public void CalculateDailyTollFeeTotals_Should_SkipZeroTolls()
+    public void CalculateTollFees_Should_SkipZeroTolls()
     {
         // Arrange
-        var tollFees = new List<TollTimeFeeResult>
+        var tollFees = new List<TollFeeResult>
         {
-            new() { TollTime = new DateTime(2025, 09, 29, 06, 00, 0), TollFee = 0m },
-            new() { TollTime = new DateTime(2025, 09, 29, 07, 00, 0), TollFee = 20m }
+            new() { TollTime = new DateTime(2025, 09, 29), TollFee = 0m },
+            new() { TollTime = new DateTime(2025, 09, 29), TollFee = 20m }
         };
 
         // Act
-        var result = _sut.CalculateDailyTollFeeTotals(tollFees);
+        var result = _sut.CalculateTollFees(tollFees);
 
         // Assert
         Assert.Single(result.TollFees);
@@ -76,17 +76,17 @@ public class TollFeesCalculationServiceTests
     }
 
     [Fact]
-    public void CalculateDailyTollFeeTotals_Should_OrderResultsByDate()
+    public void CalculateTollFees_Should_OrderResultsByDate()
     {
         // Arrange
-        var tollFees = new List<TollTimeFeeResult>
+        var tollFees = new List<TollFeeResult>
         {
-            new() { TollTime = new DateTime(2025, 10, 01, 08, 00, 0), TollFee = 20m },
-            new() { TollTime = new DateTime(2025, 09, 30, 08, 00, 0), TollFee = 20m }
+            new() { TollTime = new DateTime(2025, 10, 01), TollFee = 20m },
+            new() { TollTime = new DateTime(2025, 09, 30), TollFee = 20m }
         };
 
         // Act
-        var result = _sut.CalculateDailyTollFeeTotals(tollFees);
+        var result = _sut.CalculateTollFees(tollFees);
 
         // Assert
         Assert.Equal(DateOnly.FromDateTime(new DateTime(2025, 09, 30)), result.TollFees[0].Date);
@@ -101,10 +101,12 @@ public class TollFeesCalculationServiceTests
         var dateTwo = new DateTime(2025, 9, 25, 7, 0, 0);
         var input = new[] { date, dateTwo };
 
-        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 0m }));
-        A.CallTo(() => _tollFeesRepository.GetTollFee(dateTwo))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 0m }));
+        var repositoryResponse = new ApplicationResult<List<TollFeeResult>>
+        {
+            Result = new List<TollFeeResult> { new() { TollFee = 0m } }
+        };
+        A.CallTo(() => _tollFeesRepository.GetTollFees(input))
+            .Returns(repositoryResponse);
 
         // Act
         var result = _sut.CalculateNonOverlappingTollFees(input);
@@ -113,38 +115,36 @@ public class TollFeesCalculationServiceTests
         Assert.False(result.IsSuccessful);
         Assert.Null(result.Result);
 
-        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeesRepository.GetTollFee(dateTwo))
+        A.CallTo(() => _tollFeesRepository.GetTollFees(input))
             .MustHaveHappenedOnceExactly();
     }
 
     [Fact]
     public void CalculateNonOverlappingTollFees_PartialZeroFees_SumsNonZeroAndCaps()
     {
-        var date = new DateTime(2025, 9, 25, 6, 0, 0);
-        var input = new[] { date, date.AddMinutes(15), date.AddHours(1) };
-
-        A.CallTo(() => _tollFeesRepository.GetTollFee(input[0]))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 0m }));
-        A.CallTo(() => _tollFeesRepository.GetTollFee(input[1]))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 25m }));
-        A.CallTo(() => _tollFeesRepository.GetTollFee(input[2]))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 45m }));
+        var date = new DateTimeOffset(2025, 9, 25, 6, 0, 0, TimeSpan.Zero);
+        var input = new[] { date, date.AddMinutes(15), date.AddHours(2) };
+        var ordered = input
+            .Select(dateTime => dateTime.UtcDateTime)
+            .ToList();
+        var repositoryResponse = new List<TollFeeResult>
+        {
+            new() { TollTime = input[0].UtcDateTime, TollFee = 20m },
+            new() { TollTime = input[1].UtcDateTime, TollFee = 35m },
+            new() { TollTime = input[2].UtcDateTime, TollFee = 30m },
+        };
+        A.CallTo(() => _tollFeesRepository.GetTollFees(ordered))
+            .Returns(ApplicationResult.WithSuccess(repositoryResponse));
 
         // Act
-        var result = _sut.CalculateNonOverlappingTollFees(input);
+        var result = _sut.CalculateNonOverlappingTollFees(ordered);
 
         // Assert
         Assert.True(result.IsSuccessful);
         var day = Assert.Single(result.Result.TollFees);
         Assert.Equal(60m, day.TollFee);
 
-        A.CallTo(() => _tollFeesRepository.GetTollFee(input[0]))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeesRepository.GetTollFee(input[1]))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeesRepository.GetTollFee(input[2]))
+        A.CallTo(() => _tollFeesRepository.GetTollFees(ordered))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -169,9 +169,8 @@ public class TollFeesCalculationServiceTests
         var date = new DateTime(2025, 9, 25, 7, 0, 0);
         var dateTwo = new DateTime(2025, 9, 25, 8, 0, 0);
         var input = new[] { date, dateTwo };
-
-        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
-            .Returns(ApplicationResult.WithError<TollFeeResult>("boom"));
+        A.CallTo(() => _tollFeesRepository.GetTollFees(input))
+            .Returns(ApplicationResult.WithError<List<TollFeeResult>>("boom"));
 
         // Act
         var result = _sut.CalculateNonOverlappingTollFees(input);
@@ -179,73 +178,76 @@ public class TollFeesCalculationServiceTests
         // Assert
         Assert.False(result.IsSuccessful);
         Assert.Null(result.Result);
-        A.CallTo(() => _tollFeesRepository.GetTollFee(dateTwo)).MustNotHaveHappened();
+        A.CallTo(() => _tollFeesRepository.GetTollFees(input))
+            .MustHaveHappenedOnceExactly();
     }
 
     [Fact]
     public void CalculateNonOverlappingTollFees_HappyPath_SumsPerDay_WithCap60()
     {
-        // Arrange (same day)
-        var date = new DateTime(2025, 9, 25, 6, 0, 0);
-        var input = new[] { date, date.AddMinutes(30), date.AddHours(2) };
-
-        A.CallTo(() => _tollFeesRepository.GetTollFee(input[0]))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 20m }));
-        A.CallTo(() => _tollFeesRepository.GetTollFee(input[1]))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 25m }));
-        A.CallTo(() => _tollFeesRepository.GetTollFee(input[2]))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 30m }));
+        // Arrange
+        var date = new DateTimeOffset(2025, 9, 25, 6, 0, 0, TimeSpan.Zero);
+        var input = new[] { date, date.AddMinutes(61), date.AddMinutes(200), date.AddHours(2) };
+        var ordered = input
+            .Select(dateTime => dateTime.UtcDateTime)
+            .ToList();
+        var repositoryResponse = new List<TollFeeResult>
+        {
+            new() { TollTime = ordered[0], TollFee = 20m },
+            new() { TollTime = ordered[1], TollFee = 35m },
+            new() { TollTime = ordered[2], TollFee = 30m },
+            new() { TollTime = ordered[3], TollFee = 30m },
+        };
+        A.CallTo(() => _tollFeesRepository.GetTollFees(A<List<DateTime>>._))
+            .Returns(ApplicationResult.WithSuccess(repositoryResponse));
 
         // Act
-        var result = _sut.CalculateNonOverlappingTollFees(input);
+        var result = _sut.CalculateNonOverlappingTollFees(ordered);
 
         // Assert
         Assert.True(result.IsSuccessful);
         Assert.NotNull(result.Result);
         var day = Assert.Single(result.Result.TollFees);
-        Assert.Equal(new DateOnly(2025, 9, 25), day.Date);
+        Assert.Equal(DateOnly.FromDateTime(new DateTime(2025,09,25)), day.Date);
         Assert.Equal(60m, day.TollFee);
-        A.CallTo(() => _tollFeesRepository.GetTollFee(input[0]))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeesRepository.GetTollFee(input[1]))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeesRepository.GetTollFee(input[2]))
+        A.CallTo(() => _tollFeesRepository.GetTollFees(A<List<DateTime>>._))
             .MustHaveHappenedOnceExactly();
     }
 
     [Fact]
     public void CalculateNonOverlappingTollFees_MultipleDays_ReturnsSeparateEntries()
     {
-        var date = new DateTime(2025, 9, 25, 7, 0, 0);
-        var dateWithDifferentTime = new DateTime(2025, 9, 25, 8, 0, 0);
-        var dateThree = new DateTime(2025, 9, 26, 9, 0, 0);
+        var date = new DateTimeOffset(2025, 9, 22, 7, 0, 0, TimeSpan.Zero);
+        var dateWithDifferentTime = new DateTimeOffset(2025, 9, 25, 8, 0, 0, TimeSpan.Zero);
+        var dateThree = new DateTimeOffset(2025, 9, 26, 9, 0, 0, TimeSpan.Zero);
 
         var input = new[] { date, dateWithDifferentTime, dateThree };
 
-        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 10m }));
-        A.CallTo(() => _tollFeesRepository.GetTollFee(dateWithDifferentTime))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 15m }));
-        A.CallTo(() => _tollFeesRepository.GetTollFee(dateThree))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 40m }));
+        var ordered = input
+            .Select(dateTime => dateTime.UtcDateTime)
+            .ToList();
+        var repositoryResponse = new List<TollFeeResult>
+        {
+            new() { TollTime = input[0].UtcDateTime, TollFee = 20m },
+            new() { TollTime = input[1].UtcDateTime, TollFee = 25m },
+            new() { TollTime = input[2].UtcDateTime, TollFee = 40m },
+        };
+        A.CallTo(() => _tollFeesRepository.GetTollFees(ordered))
+            .Returns(ApplicationResult.WithSuccess(repositoryResponse));
 
         // Act
-        var result = _sut.CalculateNonOverlappingTollFees(input);
+        var result = _sut.CalculateNonOverlappingTollFees(ordered);
 
         // Assert
         Assert.True(result.IsSuccessful);
-        Assert.Equal(2, result.Result.TollFees.Count);
+        Assert.Equal(3, result.Result.TollFees.Count);
 
         var day1 = result.Result.TollFees.First(x => x.Date == new DateOnly(2025, 9, 25));
         var day2 = result.Result.TollFees.First(x => x.Date == new DateOnly(2025, 9, 26));
 
         Assert.Equal(25m, day1.TollFee);
         Assert.Equal(40m, day2.TollFee);
-        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeesRepository.GetTollFee(dateWithDifferentTime))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeesRepository.GetTollFee(dateThree))
+        A.CallTo(() => _tollFeesRepository.GetTollFees(ordered))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -268,13 +270,13 @@ public class TollFeesCalculationServiceTests
         //Arrange
         var baseDate = new DateTime(2025, 9, 25, 8, 0, 0);
         var times = new[] { baseDate, baseDate.AddMinutes(30), baseDate.AddMinutes(45) };
+        var repositoryResponse = new ApplicationResult<List<TollFeeResult>>
+        {
+            Result = new List<TollFeeResult> { new() { TollFee = 10m }, new() { TollFee = 20m }, new() { TollFee = 15m } }
+        };
+        A.CallTo(() => _tollFeesRepository.GetTollFees(times))
+            .Returns(repositoryResponse);
 
-        A.CallTo(() => _tollFeesRepository.GetTollFee(baseDate))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 10m }));
-        A.CallTo(() => _tollFeesRepository.GetTollFee(baseDate.AddMinutes(30)))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 20m }));
-        A.CallTo(() => _tollFeesRepository.GetTollFee(baseDate.AddMinutes(45)))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 15m }));
 
         //Act
         var result = _sut.CalculateOverlappingTollFees(times);
@@ -282,12 +284,8 @@ public class TollFeesCalculationServiceTests
         //Assert
         Assert.True(result.IsSuccessful);
         var day = Assert.Single(result.Result.TollFees);
-        Assert.Equal(45m, day.TollFee);
-        A.CallTo(() => _tollFeesRepository.GetTollFee(baseDate))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeesRepository.GetTollFee(baseDate.AddMinutes(30)))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeesRepository.GetTollFee(baseDate.AddMinutes(45)))
+        Assert.Equal(20m, day.TollFee);
+        A.CallTo(() => _tollFeesRepository.GetTollFees(times))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -295,28 +293,28 @@ public class TollFeesCalculationServiceTests
     public void CalculateOverlappingTollFees_MultipleTimeWindowsSameDay_ReturnsCorrectFee()
     {
         //Arrange
-        var date = new DateTime(2025, 9, 25, 8, 0, 0);
+        var date = new DateTimeOffset(2025, 9, 25, 8, 0, 0, TimeSpan.Zero);
         var times = new[] { date, date.AddMinutes(40), date.AddMinutes(70) };
-
-        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 10m }));
-        A.CallTo(() => _tollFeesRepository.GetTollFee(date.AddMinutes(40)))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 25m }));
-        A.CallTo(() => _tollFeesRepository.GetTollFee(date.AddMinutes(70)))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 15m }));
+        var ordered = times
+            .Select(dateTime => dateTime.UtcDateTime)
+            .ToList();
+        var repositoryResponse = new List<TollFeeResult>
+        {
+            new() { TollTime = times[0].UtcDateTime, TollFee = 20m },
+            new() { TollTime = times[1].UtcDateTime, TollFee = 10m },
+            new() { TollTime = times[2].UtcDateTime, TollFee = 20m },
+        };
+        A.CallTo(() => _tollFeesRepository.GetTollFees(ordered))
+            .Returns(ApplicationResult.WithSuccess(repositoryResponse));
 
         //Act
-        var result = _sut.CalculateOverlappingTollFees(times);
+        var result = _sut.CalculateOverlappingTollFees(ordered);
 
         //Assert
         Assert.True(result.IsSuccessful);
         var day = Assert.Single(result.Result.TollFees);
-        Assert.Equal(50m, day.TollFee);
-        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeesRepository.GetTollFee(date.AddMinutes(40)))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeesRepository.GetTollFee(date.AddMinutes(70)))
+        Assert.Equal(40m, day.TollFee);
+        A.CallTo(() => _tollFeesRepository.GetTollFees(ordered))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -324,48 +322,68 @@ public class TollFeesCalculationServiceTests
     public void CalculateOverlappingTollFees_DayCapIs_60()
     {
         //Arrange
-        var date = new DateTime(2025, 9, 25, 6, 0, 0);
+        var date = new DateTimeOffset(2025, 9, 25, 6, 0, 0, TimeSpan.Zero);
         var times = new[]
         {
-            date, date.AddMinutes(30), date.AddMinutes(70), date.AddMinutes(90), date.AddMinutes(140), date.AddMinutes(160),
-            date.AddMinutes(210), date.AddMinutes(230)
+            date,
+            date.AddMinutes(30), 
+            date.AddMinutes(70), 
+            date.AddMinutes(90), 
+            date.AddMinutes(140), 
+            date.AddMinutes(160),
+            date.AddMinutes(210), 
+            date.AddMinutes(230)
         };
 
-        foreach (var time in times)
+        var ordered = times
+            .Select(dateTime => dateTime.UtcDateTime)
+            .ToList();
+        var repositoryResponse = new List<TollFeeResult>
         {
-            var fee = time.Minute % 60 == 30 || time.Minute % 60 == 40 ? 20m : 10m;
-            A.CallTo(() => _tollFeesRepository.GetTollFee(time))
-                .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = fee }));
-        }
+            new() { TollTime = times[0].UtcDateTime, TollFee = 20m },
+            new() { TollTime = times[1].UtcDateTime, TollFee = 35m },
+            new() { TollTime = times[2].UtcDateTime, TollFee = 30m },
+            new() { TollTime = times[3].UtcDateTime, TollFee = 30m },
+            new() { TollTime = times[4].UtcDateTime, TollFee = 30m },
+            new() { TollTime = times[5].UtcDateTime, TollFee = 30m },
+            new() { TollTime = times[6].UtcDateTime, TollFee = 30m },
+            new() { TollTime = times[7].UtcDateTime, TollFee = 30m },
+        };
+        A.CallTo(() => _tollFeesRepository.GetTollFees(ordered))
+            .Returns(ApplicationResult.WithSuccess(repositoryResponse));
 
         //Act
-        var result = _sut.CalculateOverlappingTollFees(times);
+        var result = _sut.CalculateOverlappingTollFees(ordered);
 
         //Assert
         Assert.True(result.IsSuccessful);
         var day = Assert.Single(result.Result.TollFees);
         Assert.Equal(60m, day.TollFee);
-        A.CallTo(() => _tollFeesRepository.GetTollFee(A<DateTime>._))
-            .MustHaveHappenedANumberOfTimesMatching(x => x == times.Length);
+        A.CallTo(() => _tollFeesRepository.GetTollFees(ordered))
+            .MustHaveHappenedOnceExactly();
     }
 
     [Fact]
     public void CalculateOverlappingTollFees_GroupsByDay_ReturnsSeparateEntries()
     {
         //Arrange
-        var dayOne = new DateTime(2025, 9, 25, 8, 0, 0);
-        var dayTwo = new DateTime(2025, 9, 26, 7, 0, 0);
+        var dayOne = new DateTimeOffset(2025, 9, 25, 8, 0, 0, TimeSpan.Zero);
+        var dayTwo = new DateTimeOffset(2025, 9, 26, 7, 0, 0, TimeSpan.Zero);
         var times = new[] { dayOne, dayOne.AddMinutes(30), dayTwo };
-
-        A.CallTo(() => _tollFeesRepository.GetTollFee(dayOne))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 10m }));
-        A.CallTo(() => _tollFeesRepository.GetTollFee(dayOne.AddMinutes(30)))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 20m }));
-        A.CallTo(() => _tollFeesRepository.GetTollFee(dayTwo))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 15m }));
+        var ordered = times
+            .Select(dateTime => dateTime.UtcDateTime)
+            .ToList();
+        var repositoryResponse = new List<TollFeeResult>
+        {
+            new() { TollTime = times[0].UtcDateTime, TollFee = 20m },
+            new() { TollTime = times[1].UtcDateTime, TollFee = 20m },
+            new() { TollTime = times[2].UtcDateTime, TollFee = 35m },
+        };
+        A.CallTo(() => _tollFeesRepository.GetTollFees(ordered))
+            .Returns(ApplicationResult.WithSuccess(repositoryResponse));
 
         //Act
-        var result = _sut.CalculateOverlappingTollFees(times);
+        var result = _sut.CalculateOverlappingTollFees(ordered);
 
         //Assert
         Assert.True(result.IsSuccessful);
@@ -374,13 +392,9 @@ public class TollFeesCalculationServiceTests
         var dayOneResult = result.Result.TollFees.First(x => x.Date == new DateOnly(2025, 9, 25));
         var dayTwoResult = result.Result.TollFees.First(x => x.Date == new DateOnly(2025, 9, 26));
 
-        Assert.Equal(30m, dayOneResult.TollFee);
-        Assert.Equal(15m, dayTwoResult.TollFee);
-        A.CallTo(() => _tollFeesRepository.GetTollFee(dayOne))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeesRepository.GetTollFee(dayOne.AddMinutes(30)))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollFeesRepository.GetTollFee(dayTwo))
+        Assert.Equal(20m, dayOneResult.TollFee);
+        Assert.Equal(35m, dayTwoResult.TollFee);
+        A.CallTo(() => _tollFeesRepository.GetTollFees(ordered))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -389,15 +403,15 @@ public class TollFeesCalculationServiceTests
     {
         //Arrange
         var date = new DateTime(2025, 9, 25, 8, 0, 0);
-        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
-            .Returns(ApplicationResult.WithError<TollFeeResult>("boom"));
+        A.CallTo(() => _tollFeesRepository.GetTollFees(new[] { date }))
+            .Returns(ApplicationResult.WithError<List<TollFeeResult>>("boom"));
 
         //Act
         var result = _sut.CalculateOverlappingTollFees(new[] { date });
 
         //Assert
         Assert.False(result.IsSuccessful);
-        A.CallTo(() => _tollFeesRepository.GetTollFee(date))
+        A.CallTo(() => _tollFeesRepository.GetTollFees(new[] { date }))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -416,35 +430,18 @@ public class TollFeesCalculationServiceTests
     }
 
     [Fact]
-    public void GetTollFees_ShouldReturnError_WhenRepositoryReturnsFailure()
-    {
-        // Arrange
-        var tollTime = DateTime.UtcNow;
-        A.CallTo(() => _tollFeesRepository.GetTollFee(tollTime))
-            .Returns(ApplicationResult.WithError<TollFeeResult>("Repository failure"));
-
-        var list = new List<DateTime> { tollTime };
-
-        // Act
-        var result = _sut.GetTollFees(list);
-
-        // Assert
-        Assert.False(result.IsSuccessful);
-        Assert.Contains("Internal error occurred", result.Messages.First());
-    }
-
-    [Fact]
     public void GetTollFees_ShouldReturnTollFees_WhenRepositoryReturnsSuccess()
     {
         // Arrange
         var tollTime1 = DateTime.UtcNow;
         var tollTime2 = tollTime1.AddMinutes(30);
+        var repositoryResponse = new ApplicationResult<List<TollFeeResult>>
+        {
+            Result = new List<TollFeeResult> { new() { TollFee = 10m }, new() { TollFee = 20m }, }
+        };
+        A.CallTo(() => _tollFeesRepository.GetTollFees(new[] { tollTime1, tollTime2 }))
+            .Returns(repositoryResponse);
 
-        A.CallTo(() => _tollFeesRepository.GetTollFee(tollTime1))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 10m }));
-
-        A.CallTo(() => _tollFeesRepository.GetTollFee(tollTime2))
-            .Returns(ApplicationResult.WithSuccess(new TollFeeResult { TollFee = 20m }));
 
         var list = new List<DateTime> { tollTime1, tollTime2 };
 
@@ -456,5 +453,78 @@ public class TollFeesCalculationServiceTests
         Assert.Equal(2, result.Result?.Count);
         Assert.Equal(10m, result.Result?[0].TollFee);
         Assert.Equal(20m, result.Result?[1].TollFee);
+        A.CallTo(() => _tollFeesRepository.GetTollFees(new[] { tollTime1, tollTime2 }))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    [Fact]
+    public void CalculateDailyTollFees_SingleToll_ReturnsThatToll()
+    {
+        var tolls = new List<TollFeeResult>
+        {
+            new() { TollTime = new DateTime(2025, 9, 30), TollFee = 10 }
+        };
+
+
+        var result = _sut.CalculateDailyTollFees(tolls);
+
+        Assert.Single(result);
+        Assert.Equal(10, result[0]);
+    }
+
+    [Fact]
+    public void CalculateDailyTollFees_MultipleTollsWithin60Minutes_ReturnsMaxTollOnly()
+    {
+        var tolls = new List<TollFeeResult>
+        {
+            new() { TollTime = new DateTime(2025, 9, 30), TollFee = 10 },
+            new() { TollTime = new DateTime(2025, 9, 30), TollFee = 15 },
+            new() { TollTime = new DateTime(2025, 9, 30), TollFee = 8 }
+        };
+
+        var result = _sut.CalculateDailyTollFees(tolls);
+
+        Assert.Single(result);
+        Assert.Equal(15, result[0]);
+    }
+
+    [Fact]
+    public void CalculateDailyTollFees_MultipleTollsMoreThan60MinutesApart_ReturnsAllTolls()
+    {
+        var tolls = new List<TollFeeResult>
+        {
+            new() { TollTime = new DateTime(2025, 9, 30, 8, 15, 0), TollFee = 10 },
+            new() { TollTime = new DateTime(2025, 9, 30, 12, 15, 0), TollFee = 15 }
+        };
+
+        var result = _sut.CalculateDailyTollFees(tolls);
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal(10, result[0]);
+        Assert.Equal(15, result[1]);
+    }
+
+    [Fact]
+    public void CalculateDailyTollFees_MixedScenario_ReturnsCorrectTolls()
+    {
+        var tolls = new List<TollFeeResult>
+        {
+            new() { TollTime = new DateTime(2025, 9, 30, 8, 15, 0 ), TollFee = 10 },
+            new() { TollTime = new DateTime(2025, 9, 30, 11, 15, 0), TollFee = 15 },
+            new() { TollTime = new DateTime(2025, 9, 30, 13, 15, 0), TollFee = 8 },
+            new() { TollTime = new DateTime(2025, 9, 30, 13, 15, 0), TollFee = 12 }
+        };
+
+        var sortedTollsPerDay = tolls
+            .Select(t => new TollFeeResult { TollTime = t.TollTime, TollFee = t.TollFee })
+            .OrderBy(t => t.TollTime)
+            .ToList();
+
+        var result = _sut.CalculateDailyTollFees(sortedTollsPerDay);
+
+        Assert.Equal(3, result.Count);
+        Assert.Equal(10, result[0]);
+        Assert.Equal(15, result[1]);
+        Assert.Equal(12, result[2]);
     }
 }

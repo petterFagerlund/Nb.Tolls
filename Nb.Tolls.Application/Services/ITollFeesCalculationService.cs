@@ -4,6 +4,6 @@ namespace Nb.Tolls.Application.Services;
 
 public interface ITollFeesCalculationService
 {
-    ApplicationResult<TollFeesResult> CalculateNonOverlappingTollFees(IReadOnlyList<DateTime> nonOverlappingTollTimes);
-    ApplicationResult<TollFeesResult> CalculateOverlappingTollFees(IReadOnlyList<DateTime> overlappingTollTimes);
+    ApplicationResult<DailyTollFeesResult> CalculateNonOverlappingTollFees(IReadOnlyList<DateTime> nonOverlappingTollTimes);
+    ApplicationResult<DailyTollFeesResult> CalculateOverlappingTollFees(IReadOnlyList<DateTime> overlappingTollTimes);
 }

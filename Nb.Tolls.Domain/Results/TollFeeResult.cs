@@ -1,6 +1,7 @@
-namespace Nb.Tolls.Domain.Results;
+﻿namespace Nb.Tolls.Domain.Results;
 
 public class TollFeeResult
 {
-    public required decimal TollFee { get; init; }
+    public DateTime TollTime { get; init; }
+    public decimal TollFee { get; init; }
 }

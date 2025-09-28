@@ -50,9 +50,9 @@ public class TollFeesServiceTests
             .Returns(ordered.ToList());
         A.CallTo(() => _tollFeesCalculationService.CalculateNonOverlappingTollFees(ordered))
             .Returns(
-                new ApplicationResult<TollFeesResult>
+                new ApplicationResult<DailyTollFeesResult>
                 {
-                    Result = new TollFeesResult
+                    Result = new DailyTollFeesResult
                     {
                         TollFees =
                         [
@@ -103,9 +103,9 @@ public class TollFeesServiceTests
             .Returns(ordered.ToList());
         A.CallTo(() => _tollFeesCalculationService.CalculateOverlappingTollFees(ordered))
             .Returns(
-                new ApplicationResult<TollFeesResult>
+                new ApplicationResult<DailyTollFeesResult>
                 {
-                    Result = new TollFeesResult
+                    Result = new DailyTollFeesResult
                     {
                         TollFees =
                         [
@@ -249,9 +249,9 @@ public class TollFeesServiceTests
 
         A.CallTo(() => _tollFeesCalculationService.CalculateOverlappingTollFees(A<List<DateTime>>._))
             .Returns(
-                new ApplicationResult<TollFeesResult>
+                new ApplicationResult<DailyTollFeesResult>
                 {
-                    Result = new TollFeesResult
+                    Result = new DailyTollFeesResult
                     {
                         TollFees =
                         [
@@ -262,9 +262,9 @@ public class TollFeesServiceTests
 
         A.CallTo(() => _tollFeesCalculationService.CalculateNonOverlappingTollFees(A<List<DateTime>>._))
             .Returns(
-                new ApplicationResult<TollFeesResult>
+                new ApplicationResult<DailyTollFeesResult>
                 {
-                    Result = new TollFeesResult
+                    Result = new DailyTollFeesResult
                     {
                         TollFees =
                         [
