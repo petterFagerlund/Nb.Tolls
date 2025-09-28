@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     </ItemGroup>
 
     <ItemGroup>
@@ -17,11 +18,5 @@
       <ProjectReference Include="..\Nb.Tolls.Infrastructure\Nb.Tolls.Infrastructure.csproj" />
       <ProjectReference Include="..\Nb.Tolls.WebApi.Models\Nb.Tolls.WebApi.Models.csproj" />
     </ItemGroup>
-
-  <ItemGroup> 
-    <None Include="..\Nb.Tolls.Infrastructure\Data\TollFeesData.json" CopyToOutputDirectory="PreserveNewest">
-      <Link>Data\TollFeesData.json</Link>
-    </None> 
-  </ItemGroup>
-
+  
 </Project>

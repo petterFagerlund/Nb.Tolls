@@ -4,39 +4,44 @@ using Nb.Tolls.Application.Registrations;
 using Nb.Tolls.Infrastructure.Registrations;
 using Nb.Tolls.WebApi.Host.Validators;
 using Nb.Tolls.WebApi.Host.Validators.Implementation;
+using Nb.Tolls.WebApi.Host.Swagger;
 
 namespace Nb.Tolls.WebApi.Host;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        
         builder.Configuration
             .SetBasePath(builder.Environment.ContentRootPath)
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
             .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
             .AddEnvironmentVariables();
 
+
         builder.Services
             .AddControllers()
-            .AddJsonOptions(o =>
-            {
-                o.JsonSerializerOptions.Converters.Add(
-                    new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false));
-            });
+            .AddJsonOptions(
+                o =>
+                {
+                    o.JsonSerializerOptions.Converters.Add(
+                        new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false));
+                });
+        
+        builder.Services.AddSwagger();
 
-        builder.Services.AddScoped<ITollRequestValidator, TollRequestValidator>();
+        builder.Services.AddScoped<ITollFeesRequestValidator, TollFeesFeesRequestValidator>();
         builder.Services.AddTollsApplication();
         builder.Services.AddTollsInfrastructure(builder.Configuration);
-
-        builder.Services.AddControllers();
-
+        
         var app = builder.Build();
+        
+        app.UseSwagger();
+        app.UseSwaggerUI();
 
         app.MapControllers();
-
-        app.Run();
+        
+        await app.RunAsync();
     }
 }
