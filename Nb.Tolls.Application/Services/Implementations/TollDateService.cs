@@ -58,7 +58,7 @@ public class TollDateService : ITollDateService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to check holidays for {Date}. Treating as non-holiday.", date);
+            _logger.LogWarning(ex, "Failed to check holidays for {TollFeeDate}. Treating as non-holiday.", date);
             return false;
         }
     }

@@ -20,7 +20,7 @@ public class TollTimeService : ITollTimeService
             _logger.LogError("No toll times provided.");
             return [];
         }
-        
+
         var result = new List<DateTime>();
         foreach (var tollTime in tollTimes)
         {
@@ -42,71 +42,61 @@ public class TollTimeService : ITollTimeService
         return result;
     }
 
-    public IReadOnlyList<DateTime> GetNonOverlappingTollTimes(List<DateTime> tollTimes)
+    public List<DateTime> GetNonOverlappingTollTimes(List<DateTime> tollTimes)
     {
-        if (tollTimes.Count == 0)
-        {
-            _logger.LogError("No toll times provided.");
-            return Array.Empty<DateTime>();
-        }
+        tollTimes.Sort();
+        var nonOverlappingTollTimes = new List<DateTime>();
+        DateTime? lastTollTime = null;
 
-        var orderedTollTimes = tollTimes.OrderBy(dateTime => dateTime).ToList();
-        var nonOverlappingTollsTimes = new List<DateTime>();
-        DateTime? lastIncludedToll  = null;
-
-        foreach (var currentTollTime in orderedTollTimes)
+        foreach (var currentTollTime in tollTimes)
         {
-            if (lastIncludedToll  is null)
+            if (lastTollTime is null)
             {
-                lastIncludedToll  = currentTollTime;
-                nonOverlappingTollsTimes.Add(currentTollTime);
+                lastTollTime = currentTollTime;
+                nonOverlappingTollTimes.Add(currentTollTime);
             }
-            else if (currentTollTime - lastIncludedToll  >= TimeSpan.FromMinutes(60))
+            else if (currentTollTime - lastTollTime >= TimeSpan.FromMinutes(60))
             {
-                nonOverlappingTollsTimes.Add(currentTollTime);
-                lastIncludedToll  = currentTollTime;
+                nonOverlappingTollTimes.Add(currentTollTime);
+                lastTollTime = currentTollTime;
             }
         }
 
-        if (nonOverlappingTollsTimes.Count == 1 && orderedTollTimes.Max() - orderedTollTimes.Min() < TimeSpan.FromMinutes(60))
+        if (nonOverlappingTollTimes.Count == 0 || 
+            nonOverlappingTollTimes.Count == 1 && tollTimes.Max() - tollTimes.Min() < TimeSpan.FromMinutes(60))
         {
-            return Array.Empty<DateTime>();
+            return [];
         }
 
-        return nonOverlappingTollsTimes;
+        return nonOverlappingTollTimes;
     }
 
-    public IReadOnlyList<DateTime> GetOverlappingTollTimes(List<DateTime> tollTimes)
+    public List<DateTime> GetOverlappingTollTimes(List<DateTime> tollTimes)
     {
-        if (tollTimes.Count == 0)
-        {
-            _logger.LogError("No toll times provided.");
-            return Array.Empty<DateTime>();
-        }
-        
         var overlappingTolls = new List<DateTime>();
-        DateTime? firstTollInWindow = null;
+        DateTime? lastTollTime = null;
+        tollTimes.Sort();
 
-        foreach (var currentTollTime in tollTimes.OrderBy(dateTime => dateTime))
+        foreach (var currentTollTime in tollTimes)
         {
-            if (firstTollInWindow is null)
+            if (lastTollTime is null)
             {
-                firstTollInWindow = currentTollTime;
+                lastTollTime = currentTollTime;
                 continue;
             }
 
-            if (currentTollTime - firstTollInWindow.Value < TimeSpan.FromMinutes(60))
+            if (currentTollTime - lastTollTime.Value < TimeSpan.FromMinutes(60))
             {
-                if (!overlappingTolls.Contains(firstTollInWindow.Value))
+                if (!overlappingTolls.Contains(lastTollTime.Value))
                 {
-                    overlappingTolls.Add(firstTollInWindow.Value);
+                    overlappingTolls.Add(lastTollTime.Value);
                 }
 
                 overlappingTolls.Add(currentTollTime);
             }
             else
             {
-                firstTollInWindow = currentTollTime;
+                lastTollTime = currentTollTime;
             }
         }
 

@@ -14,8 +14,8 @@ public class TollFeesResponseMapperTests
         {
             TollFees =
             [
-                new DailyTollFeeResult { Date = new DateOnly(2025, 9, 30), TollFee = 15 },
-                new DailyTollFeeResult { Date = new DateOnly(2025, 10, 1), TollFee = 8 }
+                new TollFeeResult { TollFeeTime = new DateTime(2025, 9, 30), TollFee = 15 },
+                new TollFeeResult { TollFeeTime = new DateTime(2025, 10, 1), TollFee = 8 }
             ]
         };
 

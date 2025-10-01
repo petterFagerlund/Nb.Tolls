@@ -2,5 +2,5 @@
 
 public class DailyTollFeesResult
 {
-    public required List<DailyTollFeeResult> TollFees { get; init; }
+    public required List<TollFeeResult>? TollFees { get; init; } = new();
 }

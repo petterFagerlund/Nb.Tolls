@@ -8,12 +8,16 @@ public static class TollFeesResponseMapper
     public static TollFeesResponse Map(DailyTollFeesResult dailyTollFeesResult)
     {
         var response = new TollFeesResponse { TollFees = [] };
+        if (dailyTollFeesResult.TollFees == null)
+        {
+            return response;
+        }
 
         foreach (var tollFee in dailyTollFeesResult.TollFees)
         {
             response.TollFees.Add(new TollFeeResponse
             {
-                TollDate = tollFee.Date,
+                TollDate = DateOnly.FromDateTime(tollFee.TollFeeTime),
                 TollFee = tollFee.TollFee
             });
         }

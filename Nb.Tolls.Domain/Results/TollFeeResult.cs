@@ -2,6 +2,6 @@
 
 public class TollFeeResult
 {
-    public DateTime TollTime { get; init; }
+    public DateTime TollFeeTime { get; init; }
     public decimal TollFee { get; init; }
 }

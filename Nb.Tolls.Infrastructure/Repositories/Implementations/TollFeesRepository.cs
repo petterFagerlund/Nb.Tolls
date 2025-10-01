@@ -42,17 +42,20 @@ public class TollFeesRepository : ITollFeesRepository
                 var minuteOfDay = localDateTime.Hour * 60 + localDateTime.Minute;
 
                 var rule = _tollFees.FirstOrDefault(r => minuteOfDay >= r.StartMin && minuteOfDay < r.EndMin);
-
                 if (rule == null)
                 {
                     _logger.LogWarning("No toll fee rule found for time: {DateTime}", localDateTime);
                     return ApplicationResult.NotFound<List<TollFeeResult>>(
                         "No toll fee rule found for time: " + localDateTime);
                 }
-                else
-                {
-                    results.Add(new TollFeeResult { TollTime = localDateTime, TollFee = rule.AmountSek });
-                }
+
+                results.Add(new TollFeeResult { TollFeeTime = localDateTime, TollFee = rule.AmountSek });
+            }
+
+            if (results.Count == 0)
+            {
+                _logger.LogWarning("No toll fees found for the provided times.");
+                return ApplicationResult.NotFound<List<TollFeeResult>>("No toll fees found for the provided times.");
             }
 
             return ApplicationResult.WithSuccess(results);

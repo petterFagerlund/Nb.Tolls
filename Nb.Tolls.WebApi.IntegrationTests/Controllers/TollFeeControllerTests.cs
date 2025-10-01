@@ -20,12 +20,8 @@ public class TollFeeControllerTests
 
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
-        PropertyNameCaseInsensitive = true, 
-        Converters =
-        {
-            new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) 
-            
-        },
+        PropertyNameCaseInsensitive = true,
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
@@ -42,11 +38,7 @@ public class TollFeeControllerTests
     {
         var request = new TollFeesRequest
         {
-            VehicleType = Vehicle.Car,
-            TollTimes = new[]
-            {
-                new DateTimeOffset(2025, 8, 2, 8, 0, 0, TimeSpan.Zero)
-            }
+            VehicleType = Vehicle.Car, TollTimes = new[] { new DateTimeOffset(2025, 8, 2, 8, 0, 0, TimeSpan.Zero) }
         };
 
         var applicationResult = new ApplicationResult<DailyTollFeesResult>
@@ -55,18 +47,15 @@ public class TollFeeControllerTests
             {
                 TollFees =
                 [
-                    new DailyTollFeeResult()
-                    {
-                        Date = DateOnly.FromDateTime(request.TollTimes.First().UtcDateTime), TollFee = 30,
-                    }
+                    new TollFeeResult() { TollFeeTime = request.TollTimes.First().UtcDateTime, TollFee = 30, }
                 ]
             }
         };
 
         A.CallTo(() => _hostSutApplication.TollFeesService.GetTollFees(request.VehicleType, request.TollTimes))
             .Returns(Task.FromResult(applicationResult));
-        
-        const string requestUri ="/api/tollfee";
+
+        const string requestUri = "/api/tollfee";
         var jsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -75,7 +64,7 @@ public class TollFeeControllerTests
 
         var json = JsonSerializer.Serialize(request, jsonOptions);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        
+
         var response = await _httpClient.PostAsync(requestUri, content);
         response.EnsureSuccessStatusCode();
 
@@ -84,6 +73,8 @@ public class TollFeeControllerTests
 
         Assert.NotNull(tollFeeResponse);
         Assert.Equal(applicationResult.Result.TollFees.First().TollFee, tollFeeResponse.TollFees.First().TollFee);
-        Assert.Equal(applicationResult.Result.TollFees.First().Date, tollFeeResponse.TollFees.First().TollDate);
+        Assert.Equal(
+            DateOnly.FromDateTime(applicationResult.Result.TollFees.First().TollFeeTime),
+            tollFeeResponse.TollFees.First().TollDate);
     }
 }
