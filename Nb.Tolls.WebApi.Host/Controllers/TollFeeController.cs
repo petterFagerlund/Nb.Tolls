@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Nb.Tolls.Application.Services;
 using Nb.Tolls.WebApi.Host.Mappers;
+using Nb.Tolls.WebApi.Host.Requests;
+using Nb.Tolls.WebApi.Host.Responses;
 using Nb.Tolls.WebApi.Host.Validators;
-using Nb.Tolls.WebApi.Models.Requests;
-using Nb.Tolls.WebApi.Models.Responses;
 
 namespace Nb.Tolls.WebApi.Host.Controllers;
 
@@ -12,54 +12,46 @@ namespace Nb.Tolls.WebApi.Host.Controllers;
 public class TollFeeController : ApiControllerBase
 {
     private readonly ITollFeesRequestValidator _tollFeesRequestValidator;
-    private readonly ITollFeesService _tollFeesService;
+    private readonly ITollFeesCalculatorService _tollFeesCalculatorService;
     private readonly ILogger<TollFeeController> _logger;
 
     public TollFeeController(
         ITollFeesRequestValidator tollFeesRequestValidator,
-        ITollFeesService tollFeesService,
+        ITollFeesCalculatorService tollFeesCalculatorService,
         ILogger<TollFeeController> logger) : base(logger)
     {
         _tollFeesRequestValidator = tollFeesRequestValidator;
-        _tollFeesService = tollFeesService;
+        _tollFeesCalculatorService = tollFeesCalculatorService;
         _logger = logger;
     }
 
     [HttpPost]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TollFeesResponse))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<TollFeeResponse>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetTollFees([FromBody] TollFeesRequest tollFeesRequest)
     {
-        try
+        _tollFeesRequestValidator.ValidateTollTimes(tollFeesRequest.TollTimes);
+        if (!ModelState.IsValid)
         {
-            _tollFeesRequestValidator.ValidateTollTimes(tollFeesRequest.TollTimes);
-            if (!ModelState.IsValid)
-            {
-                return ValidationProblem(ModelState);
-            }
-
-            var applicationResult = await _tollFeesService.GetTollFees(tollFeesRequest.VehicleType, tollFeesRequest.TollTimes);
-            if (!applicationResult.IsSuccessful)
-            {
-                return MapErrorResponse(applicationResult);
-            }
-
-            var result = applicationResult.Result;
-            if (result == null)
-            {
-                _logger.LogError("TollFeeResult was null despite applicationResultStatus being success");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-            
-            var response = TollFeesResponseMapper.Map(result);
-            return Ok(response);
+            return ValidationProblem(ModelState);
         }
-        catch (Exception e)
+
+        var applicationResult = await _tollFeesCalculatorService.CalculateTollFees(tollFeesRequest.VehicleType, tollFeesRequest.TollTimes);
+        if (!applicationResult.IsSuccessful)
         {
-            _logger.LogError("Exception in GetTollFees: {Message}", e.Message);
-            return StatusCode(StatusCodes.Status500InternalServerError);
+            return MapErrorResponse(applicationResult);
         }
+
+        var result = applicationResult.Result!;
+        if (result.TollFees?.Count == 0)
+        {
+            _logger.LogInformation("No toll fees applicable for the provided data.");
+            return NotFound("No toll fees applicable for the provided data.");
+        }
+
+        var response = TollFeesResponseMapper.Map(result);
+        return Ok(response);
     }
 }

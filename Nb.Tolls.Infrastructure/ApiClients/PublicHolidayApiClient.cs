@@ -1,17 +1,17 @@
 ﻿using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Nb.Tolls.Application.Clients;
+using Nb.Tolls.Application.ApiClients;
 
-namespace Nb.Tolls.Infrastructure.HttpClients;
+namespace Nb.Tolls.Infrastructure.ApiClients;
 
-public class NagerHttpClient : INagerHttpClient
+public class PublicHolidayApiClient : IPublicHolidayApiClient
 {
-    private readonly ILogger<NagerHttpClient> _logger;
+    private readonly ILogger<PublicHolidayApiClient> _logger;
     private readonly HttpClient _http;
     private readonly IMemoryCache _cache;
 
-    public NagerHttpClient(ILogger<NagerHttpClient> logger, HttpClient http, IMemoryCache cache)
+    public PublicHolidayApiClient(ILogger<PublicHolidayApiClient> logger, HttpClient http, IMemoryCache cache)
     {
         _logger = logger;
         _http = http;

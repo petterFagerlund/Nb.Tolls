@@ -5,7 +5,5 @@ public enum ApplicationResultStatus
     Success,
     Error,
     ValidationError,
-    NotFound,
-    Conflict,
-    Forbidden
+    NotFound
 }

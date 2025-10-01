@@ -1,26 +1,26 @@
 ﻿using Microsoft.Extensions.Logging;
-using Nb.Tolls.Application.Clients;
+using Nb.Tolls.Application.ApiClients;
 
 namespace Nb.Tolls.Application.Services.Implementations;
 
 public class TollDateService : ITollDateService
 {
-    private readonly INagerHttpClient _nagerHttpClient;
+    private readonly IPublicHolidayApiClient _publicHolidayApiClient;
     private readonly ILogger<TollDateService> _logger;
 
-    public TollDateService(ILogger<TollDateService> logger, INagerHttpClient nagerHttpClient)
+    public TollDateService(ILogger<TollDateService> logger, IPublicHolidayApiClient publicHolidayApiClient)
     {
         _logger = logger;
-        _nagerHttpClient = nagerHttpClient;
+        _publicHolidayApiClient = publicHolidayApiClient;
     }
     
-    public async Task<bool> IsTollFreeDateAsync(DateTime timestamp)
+    public async Task<bool> IsTollFreeDate(DateTime timestamp)
     {
         var date = DateOnly.FromDateTime(timestamp);
-        return await IsTollFreeCalendarDateAsync(date);
+        return await IsTollFreeCalendarDate(date);
     }
 
-    internal async Task<bool> IsTollFreeCalendarDateAsync(DateOnly date)
+    internal async Task<bool> IsTollFreeCalendarDate(DateOnly date)
     {
         if (date.Month == 7)
         {
@@ -54,7 +54,7 @@ public class TollDateService : ITollDateService
 
         try
         {
-            return await _nagerHttpClient.IsPublicHolidayAsync(date);
+            return await _publicHolidayApiClient.IsPublicHolidayAsync(date);
         }
         catch (Exception ex)
         {

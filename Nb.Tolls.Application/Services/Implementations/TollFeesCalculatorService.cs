@@ -6,85 +6,77 @@ using Nb.Tolls.Domain.Results;
 
 namespace Nb.Tolls.Application.Services.Implementations;
 
-public class TollFeesService : ITollFeesService
+public class TollFeesCalculatorService : ITollFeesCalculatorService
 {
     private readonly ITollFeesRepository _tollFeesRepository;
     private readonly ITollTimeService _tollTimeService;
-    private readonly ILogger<TollFeesService> _logger;
+    private readonly ILogger<TollFeesCalculatorService> _logger;
 
-    public TollFeesService(
+    public TollFeesCalculatorService(
         ITollFeesRepository tollFeesRepository,
         ITollTimeService tollTimeService,
-        ILogger<TollFeesService> logger)
+        ILogger<TollFeesCalculatorService> logger)
     {
         _tollFeesRepository = tollFeesRepository;
         _tollTimeService = tollTimeService;
         _logger = logger;
     }
 
-    public async Task<ApplicationResult<DailyTollFeesResult>> GetTollFees(
+    public async Task<ApplicationResult<DailyTollFeesResult>> CalculateTollFees(
         Vehicle vehicleType,
         DateTimeOffset[] tollTimes)
     {
-        try
+        if (VehicleTollPolicyHelper.IsTollFreeVehicle(vehicleType))
         {
-            if (TollServiceHelper.IsTollFreeVehicle(vehicleType))
-            {
-                return ApplicationResult.NotFound<DailyTollFeesResult>("Vehicle type is toll-free.");
-            }
-
-            var tollTimesUtc = tollTimes
-                .Select(dto => dto.UtcDateTime)
-                .ToList();
-
-            var eligibleTollFeeTimes = await _tollTimeService.GetEligibleTollFeeTimes(tollTimesUtc);
-            if (eligibleTollFeeTimes.Count == 0)
-            {
-                _logger.LogInformation(
-                    "No eligible toll fee times found after filtering: {@TollFeeTimes}",
-                    eligibleTollFeeTimes);
-                return ApplicationResult.NotFound<DailyTollFeesResult>("No eligible toll fee times found after filtering.");
-            }
-
-            var result = new List<TollFeeResult>();
-
-            var nonOverlappingTollTimes = _tollTimeService.GetNonOverlappingTollTimes(eligibleTollFeeTimes);
-            if (nonOverlappingTollTimes.Count != 0)
-            {
-                var nonOverlappingTollFeesResult = CalculateTollFees(nonOverlappingTollTimes);
-                if (nonOverlappingTollFeesResult.IsSuccessful)
-                {
-                    result.AddRange(nonOverlappingTollFeesResult.Result);
-                }
-            }
-
-            var overlappingTollTimes = _tollTimeService.GetOverlappingTollTimes(eligibleTollFeeTimes);
-            if (overlappingTollTimes.Count != 0)
-            {
-                var overlappingTollFeesResult = CalculateTollFees(overlappingTollTimes);
-                if (overlappingTollFeesResult.IsSuccessful)
-                {
-                    result.AddRange(overlappingTollFeesResult.Result);
-                }
-            }
-
-            if (result.Count == 0)
-            {
-                _logger.LogWarning("No toll fees found for provided times {@TollFeeTimes}", eligibleTollFeeTimes);
-                return ApplicationResult.NotFound<DailyTollFeesResult>(
-                    "No toll fees found for provided times.");
-            }
-
-            return ApplicationResult.WithSuccess(new DailyTollFeesResult { TollFees = result });
+            return ApplicationResult.NotFound<DailyTollFeesResult>("Vehicle type is toll-free.");
         }
-        catch (Exception e)
+
+        var tollTimesUtc = tollTimes
+            .Select(dto => dto.UtcDateTime)
+            .ToList();
+
+        var eligibleTollFeeTimes = await _tollTimeService.GetEligibleTollFeeTimes(tollTimesUtc);
+        if (eligibleTollFeeTimes.Count == 0)
         {
-            _logger.LogError("Exception in GetTollFees: {@Message}", e.Message);
-            return ApplicationResult.WithError<DailyTollFeesResult>("Internal error occurred while fetching tolls.");
+            _logger.LogInformation(
+                "No eligible toll fee times found after filtering: {@TollFeeTimes}",
+                eligibleTollFeeTimes);
+            return ApplicationResult.NotFound<DailyTollFeesResult>("No eligible toll fee times found after filtering.");
         }
+
+        var result = new List<TollFeeResult>();
+
+        var nonOverlappingTollTimes = _tollTimeService.GetNonOverlappingTollTimes(eligibleTollFeeTimes);
+        if (nonOverlappingTollTimes.Count != 0)
+        {
+            var nonOverlappingTollFeesResult = CalculateTollFeesFromValidTollFeeTimes(nonOverlappingTollTimes);
+            if (nonOverlappingTollFeesResult.IsSuccessful)
+            {
+                result.AddRange(nonOverlappingTollFeesResult.Result);
+            }
+        }
+
+        var overlappingTollTimes = _tollTimeService.GetOverlappingTollTimes(eligibleTollFeeTimes);
+        if (overlappingTollTimes.Count != 0)
+        {
+            var overlappingTollFeesResult = CalculateTollFeesFromValidTollFeeTimes(overlappingTollTimes);
+            if (overlappingTollFeesResult.IsSuccessful)
+            {
+                result.AddRange(overlappingTollFeesResult.Result);
+            }
+        }
+
+        if (result.Count == 0)
+        {
+            _logger.LogWarning("No toll fees found for provided times {@TollFeeTimes}", eligibleTollFeeTimes);
+            return ApplicationResult.NotFound<DailyTollFeesResult>(
+                "No toll fees found for provided times.");
+        }
+
+        return ApplicationResult.WithSuccess(new DailyTollFeesResult { TollFees = result });
     }
 
-    internal ApplicationResult<List<TollFeeResult>> CalculateTollFees(
+    internal ApplicationResult<List<TollFeeResult>> CalculateTollFeesFromValidTollFeeTimes(
         IEnumerable<DateTime> tollTimes)
     {
         var tollFeesResult = _tollFeesRepository.GetTollFees(tollTimes);
@@ -94,7 +86,7 @@ public class TollFeesService : ITollFeesService
             return ApplicationResult.WithError<List<TollFeeResult>>("Failed to fetch toll fees for overlapping times.");
         }
 
-        const decimal dailyTollFeeThreshold = 60m;
+        const int dailyTollFeeThreshold = 60;
         var tollFeesGroupedByDay = tollFeesResult.Result
             .GroupBy(t => DateOnly.FromDateTime(t.TollFeeTime));
 
@@ -124,11 +116,11 @@ public class TollFeesService : ITollFeesService
         return ApplicationResult.WithSuccess(dailyTollFeeResults);
     }
 
-    internal List<decimal> CalculateDailyTollFees(IEnumerable<TollFeeResult> tollFeeResults)
+    internal List<int> CalculateDailyTollFees(IEnumerable<TollFeeResult> tollFeeResults)
     {
-        var tollFeesPerDay = new List<decimal>();
+        var tollFeesPerDay = new List<int>();
         DateTime? previousTollTime = null;
-        decimal previousTollFee = 0;
+        var previousTollFee = 0;
         var tollFeesByTollTime = tollFeeResults.OrderBy(t => t.TollFeeTime).ToList();
 
 

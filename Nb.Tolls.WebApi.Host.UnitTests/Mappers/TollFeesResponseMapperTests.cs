@@ -24,11 +24,11 @@ public class TollFeesResponseMapperTests
 
         // Assert
         Assert.NotNull(response);
-        Assert.Equal(2, response.TollFees.Count);
-        Assert.Equal(new DateOnly(2025, 9, 30), response.TollFees[0].TollDate);
-        Assert.Equal(15, response.TollFees[0].TollFee);
-        Assert.Equal(new DateOnly(2025, 10, 1), response.TollFees[1].TollDate);
-        Assert.Equal(8, response.TollFees[1].TollFee);
+        Assert.Equal(2, response.Count);
+        Assert.Equal(new DateOnly(2025, 9, 30), response[0].TollDate);
+        Assert.Equal(15, response[0].TollFee);
+        Assert.Equal(new DateOnly(2025, 10, 1), response[1].TollDate);
+        Assert.Equal(8, response[1].TollFee);
     }
 
     [Fact]
@@ -45,6 +45,6 @@ public class TollFeesResponseMapperTests
 
         // Assert
         Assert.NotNull(response);
-        Assert.Empty(response.TollFees);
+        Assert.Empty(response);
     }
 }

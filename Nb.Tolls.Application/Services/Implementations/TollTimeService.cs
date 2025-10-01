@@ -24,7 +24,7 @@ public class TollTimeService : ITollTimeService
         var result = new List<DateTime>();
         foreach (var tollTime in tollTimes)
         {
-            var isTollFreeDate = await _tollDateService.IsTollFreeDateAsync(tollTime);
+            var isTollFreeDate = await _tollDateService.IsTollFreeDate(tollTime);
             if (isTollFreeDate)
             {
                 continue;

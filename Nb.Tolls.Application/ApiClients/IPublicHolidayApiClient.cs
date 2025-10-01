@@ -1,6 +1,6 @@
-﻿namespace Nb.Tolls.Application.Clients;
+﻿namespace Nb.Tolls.Application.ApiClients;
 
-public interface INagerHttpClient
+public interface IPublicHolidayApiClient
 {
     Task<bool> IsPublicHolidayAsync(DateOnly date, CancellationToken ct = default);
 }

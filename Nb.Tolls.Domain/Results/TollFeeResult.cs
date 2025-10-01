@@ -3,5 +3,5 @@
 public class TollFeeResult
 {
     public DateTime TollFeeTime { get; init; }
-    public decimal TollFee { get; init; }
+    public int TollFee { get; init; }
 }

@@ -2,5 +2,5 @@
 
 public interface ITollDateService
 {
-    Task<bool> IsTollFreeDateAsync(DateTime dateTime);
+    Task<bool> IsTollFreeDate(DateTime dateTime);
 }

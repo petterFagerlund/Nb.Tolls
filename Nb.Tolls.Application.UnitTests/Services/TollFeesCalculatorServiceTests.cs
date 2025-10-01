@@ -9,18 +9,18 @@ using Xunit;
 
 namespace Nb.Tolls.Application.UnitTests.Services;
 
-public class TollFeesServiceTests
+public class TollFeesCalculatorServiceTests
 {
-    private readonly TollFeesService _sut;
+    private readonly TollFeesCalculatorService _sut;
     private readonly ITollTimeService _tollTimeService;
     private readonly ITollFeesRepository _tollFeeRepository;
 
-    public TollFeesServiceTests()
+    public TollFeesCalculatorServiceTests()
     {
         _tollTimeService = A.Fake<ITollTimeService>();
-        var logger = A.Fake<ILogger<TollFeesService>>();
+        var logger = A.Fake<ILogger<TollFeesCalculatorService>>();
         _tollFeeRepository = A.Fake<ITollFeesRepository>();
-        _sut = new TollFeesService(_tollFeeRepository, _tollTimeService, logger);
+        _sut = new TollFeesCalculatorService(_tollFeeRepository, _tollTimeService, logger);
     }
 
     [Fact]
@@ -30,7 +30,7 @@ public class TollFeesServiceTests
         var input = Array.Empty<DateTimeOffset>();
 
         // Act
-        var result = await _sut.GetTollFees(Vehicle.Car, input);
+        var result = await _sut.CalculateTollFees(Vehicle.Car, input);
 
         // Assert
         Assert.False(result.IsSuccessful);
@@ -55,14 +55,14 @@ public class TollFeesServiceTests
                 {
                     Result = new List<TollFeeResult>
                     {
-                        new() { TollFeeTime = dateOne, TollFee = 10m }, new() { TollFeeTime = dateTwo, TollFee = 15m }
+                        new() { TollFeeTime = dateOne, TollFee = 10 }, new() { TollFeeTime = dateTwo, TollFee = 15 }
                     }
                 });
         var orderedInput = ordered
             .Select(d => new DateTimeOffset(d, TimeSpan.Zero))
             .ToArray();
         // Act
-        var result = await _sut.GetTollFees(Vehicle.Car, orderedInput);
+        var result = await _sut.CalculateTollFees(Vehicle.Car, orderedInput);
 
         // Assert
         Assert.True(result.IsSuccessful);
@@ -99,8 +99,8 @@ public class TollFeesServiceTests
                 {
                     Result = new List<TollFeeResult>
                     {
-                        new() { TollFeeTime = ordered[0], TollFee = 0m },
-                        new() { TollFeeTime = ordered[1], TollFee = 0m },
+                        new() { TollFeeTime = ordered[0], TollFee = 0 },
+                        new() { TollFeeTime = ordered[1], TollFee = 0 },
 
                     }
                 });
@@ -110,7 +110,7 @@ public class TollFeesServiceTests
             .ToArray();
 
         // Act
-        var result = await _sut.GetTollFees(Vehicle.Car, orderedInput);
+        var result = await _sut.CalculateTollFees(Vehicle.Car, orderedInput);
 
         // Assert
         Assert.True(result.IsSuccessful);
@@ -137,7 +137,7 @@ public class TollFeesServiceTests
         var input = Array.Empty<DateTimeOffset>();
 
         // Act
-        var result = await _sut.GetTollFees(vehicle, input);
+        var result = await _sut.CalculateTollFees(vehicle, input);
 
         // Assert
         Assert.False(result.IsSuccessful);
@@ -166,7 +166,7 @@ public class TollFeesServiceTests
             .ToArray();
 
         // Act
-        var result = await _sut.GetTollFees(vehicle, inputAsDateTimeOffsets);
+        var result = await _sut.CalculateTollFees(vehicle, inputAsDateTimeOffsets);
 
         // Assert
         Assert.False(result.IsSuccessful);
@@ -203,7 +203,7 @@ public class TollFeesServiceTests
             .Returns([date.UtcDateTime, dateTwo.UtcDateTime]);
 
         // Act
-        var result = await _sut.GetTollFees(vehicle, input);
+        var result = await _sut.CalculateTollFees(vehicle, input);
 
         // Assert
         Assert.False(result.IsSuccessful);
@@ -240,7 +240,7 @@ public class TollFeesServiceTests
             .Returns(
                 new ApplicationResult<List<TollFeeResult>>
                 {
-                    Result = new List<TollFeeResult> { new() { TollFeeTime = input[2], TollFee = 15m }, }
+                    Result = new List<TollFeeResult> { new() { TollFeeTime = input[2], TollFee = 15 }, }
                 });
 
         A.CallTo(
@@ -255,7 +255,7 @@ public class TollFeesServiceTests
                 {
                     Result = new List<TollFeeResult>
                     {
-                        new() { TollFeeTime = input[0], TollFee = 10m }, new() { TollFeeTime = input[1], TollFee = 10m },
+                        new() { TollFeeTime = input[0], TollFee = 10 }, new() { TollFeeTime = input[1], TollFee = 10 },
                     }
                 });
 
@@ -264,7 +264,7 @@ public class TollFeesServiceTests
             .ToArray();
 
         // Act
-        var result = await _sut.GetTollFees(vehicle, inputAsDateTimeOffsets);
+        var result = await _sut.CalculateTollFees(vehicle, inputAsDateTimeOffsets);
 
         // Assert
         Assert.True(result.IsSuccessful);
@@ -290,7 +290,7 @@ public class TollFeesServiceTests
     {
         const Vehicle vehicle = Vehicle.Car;
         var input = Array.Empty<DateTimeOffset>();
-        var result = await _sut.GetTollFees(vehicle, input);
+        var result = await _sut.CalculateTollFees(vehicle, input);
 
         Assert.False(result.IsSuccessful);
         Assert.Null(result.Result);
@@ -337,11 +337,8 @@ public class TollFeesServiceTests
     [Fact]
     public void CalculateDailyTollFees_ShouldReturnEmpty_WhenInputIsEmpty()
     {
-        // Arrange
-        var tolls = new List<TollFeeResult>();
-
         // Act
-        var result = _sut.CalculateDailyTollFees(tolls);
+        var result = _sut.CalculateDailyTollFees(new List<TollFeeResult>());
 
         // Assert
         Assert.Empty(result);
@@ -356,7 +353,7 @@ public class TollFeesServiceTests
         A.CallTo(() => _tollFeeRepository.GetTollFees(inputTimes)).Returns(repoResult);
 
         // Act
-        var result = _sut.CalculateTollFees(inputTimes);
+        var result = _sut.CalculateTollFeesFromValidTollFeeTimes(inputTimes);
 
         // Assert
         Assert.False(result.IsSuccessful);
@@ -372,7 +369,7 @@ public class TollFeesServiceTests
         A.CallTo(() => _tollFeeRepository.GetTollFees(inputTimes)).Returns(repoResult);
 
         // Act
-        var result = _sut.CalculateTollFees(inputTimes);
+        var result = _sut.CalculateTollFeesFromValidTollFeeTimes(inputTimes);
 
         // Assert
         Assert.False(result.IsSuccessful);
@@ -395,7 +392,7 @@ public class TollFeesServiceTests
         A.CallTo(() => _tollFeeRepository.GetTollFees(inputTimes)).Returns(repoResult);
 
         // Act
-        var result = _sut.CalculateTollFees(inputTimes);
+        var result = _sut.CalculateTollFeesFromValidTollFeeTimes(inputTimes);
 
         // Assert
         Assert.True(result.IsSuccessful);

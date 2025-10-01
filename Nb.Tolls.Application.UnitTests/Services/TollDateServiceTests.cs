@@ -1,6 +1,6 @@
 ﻿using FakeItEasy;
 using Microsoft.Extensions.Logging;
-using Nb.Tolls.Application.Clients;
+using Nb.Tolls.Application.ApiClients;
 using Nb.Tolls.Application.Services.Implementations;
 using Xunit;
 
@@ -8,13 +8,13 @@ namespace Nb.Tolls.Application.UnitTests.Services;
 
 public class TollDateServiceTests
 {
-    private readonly INagerHttpClient _nagerHttpClient = A.Fake<INagerHttpClient>();
+    private readonly IPublicHolidayApiClient _publicHolidayApiClient = A.Fake<IPublicHolidayApiClient>();
     private readonly ILogger<TollDateService> _logger = A.Fake<ILogger<TollDateService>>();
     private readonly TollDateService _sut;
 
     public TollDateServiceTests()
     {
-        _sut = new TollDateService(_logger, _nagerHttpClient);
+        _sut = new TollDateService(_logger, _publicHolidayApiClient);
     }
 
     [Fact]
@@ -24,11 +24,11 @@ public class TollDateServiceTests
         var date = new DateTime(2025, 7, 15, 12, 0, 0);
 
         // Act
-        var result = await _sut.IsTollFreeDateAsync(date);
+        var result = await _sut.IsTollFreeDate(date);
 
         // Assert
         Assert.True(result);
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(A<DateOnly>._, A<CancellationToken>._)).MustNotHaveHappened();
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(A<DateOnly>._, A<CancellationToken>._)).MustNotHaveHappened();
     }
 
     [Fact]
@@ -37,11 +37,11 @@ public class TollDateServiceTests
         var date = new DateTime(2025, 9, 27, 10, 0, 0);
 
         // Act
-        var result = await _sut.IsTollFreeDateAsync(date);
+        var result = await _sut.IsTollFreeDate(date);
 
         // Assert
         Assert.True(result);
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(A<DateOnly>._, A<CancellationToken>._)).MustNotHaveHappened();
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(A<DateOnly>._, A<CancellationToken>._)).MustNotHaveHappened();
     }
 
     [Fact]
@@ -51,11 +51,11 @@ public class TollDateServiceTests
         var date = new DateTime(2025, 9, 28, 10, 0, 0);
 
         // Act
-        var result = await _sut.IsTollFreeDateAsync(date);
+        var result = await _sut.IsTollFreeDate(date);
 
         // Assert
         Assert.True(result);
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(A<DateOnly>._, A<CancellationToken>._)).MustNotHaveHappened();
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(A<DateOnly>._, A<CancellationToken>._)).MustNotHaveHappened();
     }
 
     [Fact]
@@ -63,19 +63,19 @@ public class TollDateServiceTests
     {
         var date = new DateTime(2025, 12, 24, 10, 0, 0);
 
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(new DateOnly(2025, 12, 24), A<CancellationToken>._))
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(new DateOnly(2025, 12, 24), A<CancellationToken>._))
             .Returns(Task.FromResult(false));
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(new DateOnly(2025, 12, 25), A<CancellationToken>._))
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(new DateOnly(2025, 12, 25), A<CancellationToken>._))
             .Returns(Task.FromResult(true));
 
         // Act
-        var result = await _sut.IsTollFreeDateAsync(date);
+        var result = await _sut.IsTollFreeDate(date);
 
         // Assert
         Assert.True(result);
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(new DateOnly(2025, 12, 24), A<CancellationToken>._))
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(new DateOnly(2025, 12, 24), A<CancellationToken>._))
             .MustHaveHappened();
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(new DateOnly(2025, 12, 25), A<CancellationToken>._))
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(new DateOnly(2025, 12, 25), A<CancellationToken>._))
             .MustHaveHappened();
     }
 
@@ -85,17 +85,17 @@ public class TollDateServiceTests
         // Arrange
         var date = new DateTime(2025, 9, 25, 10, 0, 0);
 
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(new DateOnly(2025, 9, 25), A<CancellationToken>._))
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(new DateOnly(2025, 9, 25), A<CancellationToken>._))
             .Returns(Task.FromResult(false));
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(new DateOnly(2025, 9, 26), A<CancellationToken>._))
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(new DateOnly(2025, 9, 26), A<CancellationToken>._))
             .Returns(Task.FromResult(false));
 
         // Act
-        var result = await _sut.IsTollFreeDateAsync(date);
+        var result = await _sut.IsTollFreeDate(date);
 
         // Assert
         Assert.False(result);
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(A<DateOnly>._, A<CancellationToken>._))
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(A<DateOnly>._, A<CancellationToken>._))
             .MustHaveHappenedTwiceExactly();
     }
 
@@ -104,18 +104,18 @@ public class TollDateServiceTests
     {
         var date = new DateTime(2025, 9, 25, 10, 0, 0);
 
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(new DateOnly(2025, 9, 25), A<CancellationToken>._))
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(new DateOnly(2025, 9, 25), A<CancellationToken>._))
             .Throws(new Exception("network failure"));
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(new DateOnly(2025, 9, 26), A<CancellationToken>._))
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(new DateOnly(2025, 9, 26), A<CancellationToken>._))
             .Throws(new Exception("network failure"));
 
-        var result = await _sut.IsTollFreeDateAsync(date);
+        var result = await _sut.IsTollFreeDate(date);
 
         // Assert
         Assert.False(result);
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(new DateOnly(2025, 9, 25), A<CancellationToken>._))
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(new DateOnly(2025, 9, 25), A<CancellationToken>._))
             .MustHaveHappened();
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(new DateOnly(2025, 9, 26), A<CancellationToken>._))
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(new DateOnly(2025, 9, 26), A<CancellationToken>._))
             .MustHaveHappened();
     }
 
@@ -126,7 +126,7 @@ public class TollDateServiceTests
         var date = new DateOnly(2025, 7, 15);
 
         // Act
-        var result = await _sut.IsTollFreeCalendarDateAsync(date);
+        var result = await _sut.IsTollFreeCalendarDate(date);
 
         // Act
         Assert.True(result);
@@ -139,7 +139,7 @@ public class TollDateServiceTests
         var date = new DateOnly(2025, 9, 27);
 
         // Act
-        var result = await _sut.IsTollFreeCalendarDateAsync(date);
+        var result = await _sut.IsTollFreeCalendarDate(date);
 
         // Assert
         Assert.True(result);
@@ -150,10 +150,10 @@ public class TollDateServiceTests
     {
         //Arrange
         var date = new DateOnly(2025, 12, 25);
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(date, A<CancellationToken>._)).Returns(Task.FromResult(true));
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(date, A<CancellationToken>._)).Returns(Task.FromResult(true));
 
         //Act
-        var result = await _sut.IsTollFreeCalendarDateAsync(date);
+        var result = await _sut.IsTollFreeCalendarDate(date);
 
         //Assert
         Assert.True(result);
@@ -164,12 +164,12 @@ public class TollDateServiceTests
     {
         //Arrange
         var date = new DateOnly(2025, 12, 24);
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(date, A<CancellationToken>._)).Returns(Task.FromResult(false));
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(date.AddDays(1), A<CancellationToken>._))
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(date, A<CancellationToken>._)).Returns(Task.FromResult(false));
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(date.AddDays(1), A<CancellationToken>._))
             .Returns(Task.FromResult(true));
 
         //Act
-        var result = await _sut.IsTollFreeCalendarDateAsync(date);
+        var result = await _sut.IsTollFreeCalendarDate(date);
 
         //Assert
         Assert.True(result);
@@ -180,12 +180,12 @@ public class TollDateServiceTests
     {
         //Arrange
         var date = new DateOnly(2025, 9, 24);
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(date, A<CancellationToken>._)).Returns(Task.FromResult(false));
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(date.AddDays(1), A<CancellationToken>._))
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(date, A<CancellationToken>._)).Returns(Task.FromResult(false));
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(date.AddDays(1), A<CancellationToken>._))
             .Returns(Task.FromResult(false));
 
         //Act
-        var result = await _sut.IsTollFreeCalendarDateAsync(date);
+        var result = await _sut.IsTollFreeCalendarDate(date);
 
         //Assert
         Assert.False(result);
@@ -209,7 +209,7 @@ public class TollDateServiceTests
     {
         //Arrange
         var date = new DateOnly(2025, 12, 25);
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(date, A<CancellationToken>._)).Returns(Task.FromResult(true));
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(date, A<CancellationToken>._)).Returns(Task.FromResult(true));
 
         //Act
         var result = await _sut.IsPublicHolidayOrSundayAsync(date);
@@ -223,7 +223,7 @@ public class TollDateServiceTests
     {
         //Arrange
         var date = new DateOnly(2025, 9, 24);
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(date, A<CancellationToken>._)).Returns(Task.FromResult(false));
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(date, A<CancellationToken>._)).Returns(Task.FromResult(false));
 
         //Act
         var result = await _sut.IsPublicHolidayOrSundayAsync(date);
@@ -237,7 +237,7 @@ public class TollDateServiceTests
     {
         //Arrange
         var date = new DateOnly(2025, 9, 24);
-        A.CallTo(() => _nagerHttpClient.IsPublicHolidayAsync(date, A<CancellationToken>._)).Throws(new Exception("API error"));
+        A.CallTo(() => _publicHolidayApiClient.IsPublicHolidayAsync(date, A<CancellationToken>._)).Throws(new Exception("API error"));
 
         //Act
         var result = await _sut.IsPublicHolidayOrSundayAsync(date);

@@ -7,7 +7,6 @@ public class TollFeesFeesRequestValidator : ITollFeesRequestValidator
     public ModelStateDictionary ValidateTollTimes(DateTimeOffset[] tollTimes)
     {
         var modelState = new ModelStateDictionary();
-
         if (tollTimes.Length == 0)
         {
             modelState.AddModelError(nameof(tollTimes), "At least one toll time must be provided.");

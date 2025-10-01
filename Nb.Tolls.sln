@@ -8,8 +8,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nb.Tolls.Infrastructure", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nb.Tolls.WebApi.Host", "Nb.Tolls.WebApi.Host\Nb.Tolls.WebApi.Host.csproj", "{930E719E-C899-4FAD-8EBC-C3FCAFFFD01C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nb.Tolls.WebApi.Models", "Nb.Tolls.WebApi.Models\Nb.Tolls.WebApi.Models.csproj", "{0FB89F73-8E3C-499D-BA59-E8495A4E851C}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{70D1BA9F-81F4-4390-8461-B23AE938ADC5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nb.Tolls.Application.UnitTests", "Nb.Tolls.Application.UnitTests\Nb.Tolls.Application.UnitTests.csproj", "{CAC0974F-2A96-4908-86D0-333E1A5B893A}"
@@ -42,10 +40,6 @@ Global
 		{930E719E-C899-4FAD-8EBC-C3FCAFFFD01C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{930E719E-C899-4FAD-8EBC-C3FCAFFFD01C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{930E719E-C899-4FAD-8EBC-C3FCAFFFD01C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0FB89F73-8E3C-499D-BA59-E8495A4E851C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0FB89F73-8E3C-499D-BA59-E8495A4E851C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0FB89F73-8E3C-499D-BA59-E8495A4E851C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0FB89F73-8E3C-499D-BA59-E8495A4E851C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CAC0974F-2A96-4908-86D0-333E1A5B893A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CAC0974F-2A96-4908-86D0-333E1A5B893A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CAC0974F-2A96-4908-86D0-333E1A5B893A}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Nb.Tolls.Application.Clients;
+using Nb.Tolls.Application.ApiClients;
 using Nb.Tolls.Application.Repositories;
+using Nb.Tolls.Infrastructure.ApiClients;
 using Nb.Tolls.Infrastructure.Configuration;
-using Nb.Tolls.Infrastructure.HttpClients;
 using Nb.Tolls.Infrastructure.Repositories.Implementations;
 
 namespace Nb.Tolls.Infrastructure.Registrations;
@@ -22,7 +22,7 @@ public static class ServiceCollectionsExtension
             throw new ArgumentNullException(nameof(nagerBaseUrl), "Nager:BaseUrl is missing in configuration");
         }
 
-        services.AddHttpClient<INagerHttpClient, NagerHttpClient>(
+        services.AddHttpClient<IPublicHolidayApiClient, PublicHolidayApiClient>(
             client =>
             {
                 client.BaseAddress = new Uri(nagerBaseUrl);

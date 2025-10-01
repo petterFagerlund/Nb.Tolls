@@ -30,16 +30,12 @@ public class ApiControllerBase : ControllerBase
         {
             case ApplicationResultStatus.NotFound:
                 return NotFound(applicationResult.Messages);
-            case ApplicationResultStatus.Forbidden:
-                return Forbid();
             case ApplicationResultStatus.ValidationError:
                 return ValidationProblem(
                     new ValidationProblemDetails
                     {
                         Errors = new Dictionary<string, string[]> { { "request", applicationResult.Messages } }
                     });
-            case ApplicationResultStatus.Conflict:
-                return Conflict(applicationResult.Messages);
             case ApplicationResultStatus.Error:
                 return StatusCode(StatusCodes.Status500InternalServerError, applicationResult.Messages);
             default:

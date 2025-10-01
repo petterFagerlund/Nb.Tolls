@@ -40,16 +40,16 @@ public class TollFeesRepository : ITollFeesRepository
                 var localDateTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, timeZone);
                 var minuteOfDay = localDateTime.Hour * 60 + localDateTime.Minute;
 
-                var rule = _tollFees.FirstOrDefault(
+                var tollFeesModel = _tollFees.FirstOrDefault(
                     tollFeesModel => minuteOfDay >= tollFeesModel.StartMin && minuteOfDay < tollFeesModel.EndMin);
-                if (rule == null)
+                if (tollFeesModel == null)
                 {
                     _logger.LogWarning("No toll fee rule found for time: {DateTime}", localDateTime);
                     return ApplicationResult.NotFound<List<TollFeeResult>>(
                         "No toll fee rule found for time: " + localDateTime);
                 }
 
-                results.Add(new TollFeeResult { TollFeeTime = localDateTime, TollFee = rule.AmountSek });
+                results.Add(new TollFeeResult { TollFeeTime = localDateTime, TollFee = tollFeesModel.AmountSek });
             }
 
             if (results.Count == 0)
@@ -62,7 +62,7 @@ public class TollFeesRepository : ITollFeesRepository
         }
         catch (Exception e)
         {
-            _logger.LogError("Exception in GetTollFees batch: {Message}", e.Message);
+            _logger.LogError("Exception in CalculateTollFees batch: {Message}", e.Message);
             return ApplicationResult.WithError<List<TollFeeResult>>("Error calculating toll fees: " + e.Message);
         }
     }

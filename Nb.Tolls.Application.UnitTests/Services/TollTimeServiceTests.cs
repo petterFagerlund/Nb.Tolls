@@ -28,13 +28,13 @@ public class TollTimeServiceTests
         var ok = new DateTimeOffset(2025, 9, 25, 8, 0, 0, TimeSpan.Zero);
 
         var input = new List<DateTime> { sunday.UtcDateTime, early.UtcDateTime, late.UtcDateTime, ok.UtcDateTime };
-        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(sunday.UtcDateTime))
+        A.CallTo(() => _tollDateService.IsTollFreeDate(sunday.UtcDateTime))
             .Returns(true);
-        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(early.UtcDateTime))
+        A.CallTo(() => _tollDateService.IsTollFreeDate(early.UtcDateTime))
             .Returns(true);
-        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(late.UtcDateTime))
+        A.CallTo(() => _tollDateService.IsTollFreeDate(late.UtcDateTime))
             .Returns(true);
-        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(ok.UtcDateTime))
+        A.CallTo(() => _tollDateService.IsTollFreeDate(ok.UtcDateTime))
             .Returns(false);
 
         // Act
@@ -43,13 +43,13 @@ public class TollTimeServiceTests
         // Assert
         Assert.Single(result);
         Assert.Equal(ok, result[0]);
-        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(sunday.UtcDateTime))
+        A.CallTo(() => _tollDateService.IsTollFreeDate(sunday.UtcDateTime))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(early.UtcDateTime))
+        A.CallTo(() => _tollDateService.IsTollFreeDate(early.UtcDateTime))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(late.UtcDateTime))
+        A.CallTo(() => _tollDateService.IsTollFreeDate(late.UtcDateTime))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(ok.UtcDateTime))
+        A.CallTo(() => _tollDateService.IsTollFreeDate(ok.UtcDateTime))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -62,13 +62,13 @@ public class TollTimeServiceTests
             new(2025, 9, 25, 5, 59, 0, TimeSpan.Zero),
             new(2025, 9, 25, 19, 45, 0, TimeSpan.Zero)
         };
-        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(A<DateTime>._))
+        A.CallTo(() => _tollDateService.IsTollFreeDate(A<DateTime>._))
             .Returns(true);
 
         var result = await _sut.GetEligibleTollFeeTimes(input.Select(d => d.UtcDateTime).ToList());
 
         Assert.Empty(result);
-        A.CallTo(() => _tollDateService.IsTollFreeDateAsync(A<DateTime>._))
+        A.CallTo(() => _tollDateService.IsTollFreeDate(A<DateTime>._))
             .MustHaveHappenedANumberOfTimesMatching(i => i == 3);
     }
 

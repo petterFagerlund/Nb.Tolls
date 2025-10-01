@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Nb.Tolls.Application.UnitTests.Helpers;
 
-public class TollServiceHelperTests
+public class VehicleTollPolicyHelperTests
 {
     [Theory]
     [InlineData(Vehicle.Car, false)]
@@ -17,7 +17,7 @@ public class TollServiceHelperTests
     public void IsTollFreeVehicle_ReturnsExpectedResult(Vehicle vehicle, bool expected)
     {
         // Act
-        var result = TollServiceHelper.IsTollFreeVehicle(vehicle);
+        var result = VehicleTollPolicyHelper.IsTollFreeVehicle(vehicle);
 
         // Assert
         Assert.Equal(expected, result);
@@ -30,7 +30,7 @@ public class TollServiceHelperTests
         const Vehicle unknownVehicle = (Vehicle)999;
 
         // Act
-        var result = TollServiceHelper.IsTollFreeVehicle(unknownVehicle);
+        var result = VehicleTollPolicyHelper.IsTollFreeVehicle(unknownVehicle);
 
         // Assert
         Assert.False(result);

@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 using Nb.Tolls.Application.Registrations;
 using Nb.Tolls.Infrastructure.Registrations;
+using Nb.Tolls.WebApi.Host.ExceptionHandlers;
 using Nb.Tolls.WebApi.Host.Validators;
 using Nb.Tolls.WebApi.Host.Validators.Implementation;
 using Nb.Tolls.WebApi.Host.Swagger;
@@ -36,6 +37,7 @@ public class Program
         builder.Services.AddTollsInfrastructure(builder.Configuration);
         
         var app = builder.Build();
+        app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
         
         app.UseSwagger();
         app.UseSwaggerUI();

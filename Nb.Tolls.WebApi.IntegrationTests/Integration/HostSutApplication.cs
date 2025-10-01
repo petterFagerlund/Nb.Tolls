@@ -24,11 +24,11 @@ public class HostSutApplication
 {
     public HttpClient Client { get; private set; } = null!;
     public ITestOutputHelper Output { get; set; } = null!;
-    public ITollFeesService TollFeesService { get; private set; } = null!;
+    public ITollFeesCalculatorService TollFeesCalculatorService { get; private set; } = null!;
 
     public void InitApplication()
     {
-        TollFeesService = A.Fake<ITollFeesService>();
+        TollFeesCalculatorService = A.Fake<ITollFeesCalculatorService>();
 
         var hostApplication = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
@@ -37,7 +37,7 @@ public class HostSutApplication
 
                 builder.ConfigureTestServices(services =>
                 {
-                    services.AddTransient(_ => TollFeesService);
+                    services.AddTransient(_ => TollFeesCalculatorService);
                 });
 
                 builder.ConfigureLogging(loggingBuilder =>

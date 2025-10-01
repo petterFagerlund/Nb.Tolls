@@ -10,4 +10,9 @@
       <ProjectReference Include="..\Nb.Tolls.Domain\Nb.Tolls.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Requests\" />
+      <Folder Include="Responses\" />
+    </ItemGroup>
+
 </Project>

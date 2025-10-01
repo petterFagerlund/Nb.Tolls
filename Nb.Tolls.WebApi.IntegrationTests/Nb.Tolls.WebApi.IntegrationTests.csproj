@@ -28,7 +28,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Nb.Tolls.WebApi.Host\Nb.Tolls.WebApi.Host.csproj" />
     <ProjectReference Include="..\Nb.Tolls.Application\Nb.Tolls.Application.csproj" />
-    <ProjectReference Include="..\Nb.Tolls.WebApi.Models\Nb.Tolls.WebApi.Models.csproj" />
   </ItemGroup>
 
 </Project>

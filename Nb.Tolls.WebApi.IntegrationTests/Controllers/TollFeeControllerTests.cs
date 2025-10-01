@@ -1,12 +1,13 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FakeItEasy;
 using Nb.Tolls.Domain.Enums;
 using Nb.Tolls.Domain.Results;
+using Nb.Tolls.WebApi.Host.Requests;
+using Nb.Tolls.WebApi.Host.Responses;
 using Nb.Tolls.WebApi.IntegrationTests.Integration;
-using Nb.Tolls.WebApi.Models.Requests;
-using Nb.Tolls.WebApi.Models.Responses;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -38,21 +39,37 @@ public class TollFeeControllerTests
     {
         var request = new TollFeesRequest
         {
-            VehicleType = Vehicle.Car, TollTimes = new[] { new DateTimeOffset(2025, 8, 2, 8, 0, 0, TimeSpan.Zero) }
+            VehicleType = Vehicle.Car,
+            TollTimes =
+            [
+                new DateTimeOffset(2025, 9, 30, 8, 15, 0, TimeSpan.FromHours(2)),
+                new DateTimeOffset(2025, 9, 30, 9, 45, 0, TimeSpan.FromHours(2)),
+                new DateTimeOffset(2025, 9, 30, 11, 14, 0, TimeSpan.FromHours(2)),
+                new DateTimeOffset(2025, 9, 30, 16, 15, 0, TimeSpan.FromHours(2)),
+                new DateTimeOffset(2025, 9, 30, 17, 16, 0, TimeSpan.FromHours(2)),
+                new DateTimeOffset(2025, 9, 30, 12, 15, 0, TimeSpan.FromHours(2)),
+                new DateTimeOffset(2025, 9, 29, 5, 15, 0, TimeSpan.FromHours(2)),
+                new DateTimeOffset(2025, 9, 29, 8, 15, 0, TimeSpan.FromHours(2)),
+                new DateTimeOffset(2025, 9, 29, 12, 15, 0, TimeSpan.FromHours(2)),
+                new DateTimeOffset(2025, 9, 29, 15, 15, 0, TimeSpan.FromHours(2)),
+                new DateTimeOffset(2025, 9, 29, 16, 16, 0, TimeSpan.FromHours(2)),
+                new DateTimeOffset(2025, 9, 26, 16, 16, 0, TimeSpan.FromHours(2))
+            ]
         };
 
         var applicationResult = new ApplicationResult<DailyTollFeesResult>
         {
             Result = new DailyTollFeesResult
             {
-                TollFees =
-                [
-                    new TollFeeResult() { TollFeeTime = request.TollTimes.First().UtcDateTime, TollFee = 30, }
-                ]
+                TollFees = new List<TollFeeResult>
+                {
+                    new() { TollFeeTime = new DateTime(2025, 9, 26), TollFee = 18 },
+                    new() { TollFeeTime = new DateTime(2025, 9, 29), TollFee = 52 },
+                    new() { TollFeeTime = new DateTime(2025, 9, 30), TollFee = 60 }
+                }
             }
         };
-
-        A.CallTo(() => _hostSutApplication.TollFeesService.GetTollFees(request.VehicleType, request.TollTimes))
+        A.CallTo(() => _hostSutApplication.TollFeesCalculatorService.CalculateTollFees(request.VehicleType, request.TollTimes))
             .Returns(Task.FromResult(applicationResult));
 
         const string requestUri = "/api/tollfee";
@@ -69,12 +86,50 @@ public class TollFeeControllerTests
         response.EnsureSuccessStatusCode();
 
         var responseString = await response.Content.ReadAsStringAsync();
-        var tollFeeResponse = JsonSerializer.Deserialize<TollFeesResponse>(responseString, _jsonSerializerOptions);
+        var tollFeeResponse = JsonSerializer.Deserialize<List<TollFeeResponse>>(responseString, _jsonSerializerOptions);
 
         Assert.NotNull(tollFeeResponse);
-        Assert.Equal(applicationResult.Result.TollFees.First().TollFee, tollFeeResponse.TollFees.First().TollFee);
-        Assert.Equal(
-            DateOnly.FromDateTime(applicationResult.Result.TollFees.First().TollFeeTime),
-            tollFeeResponse.TollFees.First().TollDate);
+        Assert.Equal(3, tollFeeResponse.Count);
+
+        Assert.Equal(new DateOnly(2025, 9, 26), tollFeeResponse[0].TollDate);
+        Assert.Equal(18, tollFeeResponse[0].TollFee);
+
+        Assert.Equal(new DateOnly(2025, 9, 29), tollFeeResponse[1].TollDate);
+        Assert.Equal(52, tollFeeResponse[1].TollFee);
+
+        Assert.Equal(new DateOnly(2025, 9, 30), tollFeeResponse[2].TollDate);
+        Assert.Equal(60, tollFeeResponse[2].TollFee);
+    }
+    
+    [Fact]
+    public async Task GetTollFee_WhenServiceThrowsException_ReturnsInternalServerError()
+    {
+        // Arrange
+        var request = new TollFeesRequest
+        {
+            VehicleType = Vehicle.Car,
+            TollTimes =
+            [
+                new DateTimeOffset(2025, 9, 30, 8, 15, 0, TimeSpan.FromHours(2))
+            ]
+        };
+
+        A.CallTo(() => _hostSutApplication.TollFeesCalculatorService.CalculateTollFees(request.VehicleType, request.TollTimes))
+            .ThrowsAsync(new InvalidOperationException("Something went wrong"));
+
+        const string requestUri = "/api/tollfee";
+        var json = JsonSerializer.Serialize(request, _jsonSerializerOptions);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        // Act
+        var response = await _httpClient.PostAsync(requestUri, content);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+
+        var responseString = await response.Content.ReadAsStringAsync();
+        var jsonResponse = JsonSerializer.Deserialize<JsonElement>(responseString);
+
+        Assert.Equal("Something went wrong", jsonResponse.GetProperty("error").GetProperty("message").GetString());
     }
 }
