@@ -28,7 +28,6 @@ public class TollFeesRepository : ITollFeesRepository
     public ApplicationResult<List<TollFeeResult>> GetTollFees(IEnumerable<DateTime> dateTimes)
     {
         var results = new List<TollFeeResult>();
-
         try
         {
             var stockholmTimeZone = TimeZoneInfo.FindSystemTimeZoneById(_timeZone);
@@ -41,7 +40,8 @@ public class TollFeesRepository : ITollFeesRepository
                 var localDateTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, stockholmTimeZone);
                 var minuteOfDay = localDateTime.Hour * 60 + localDateTime.Minute;
 
-                var rule = _tollFees.FirstOrDefault(r => minuteOfDay >= r.StartMin && minuteOfDay < r.EndMin);
+                var rule = _tollFees.FirstOrDefault(
+                    tollFeesModel => minuteOfDay >= tollFeesModel.StartMin && minuteOfDay < tollFeesModel.EndMin);
                 if (rule == null)
                 {
                     _logger.LogWarning("No toll fee rule found for time: {DateTime}", localDateTime);

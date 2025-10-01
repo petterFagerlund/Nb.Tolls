@@ -70,9 +70,9 @@ public class TollFeesService : ITollFeesService
 
             if (result.Count == 0)
             {
-                _logger.LogWarning("No toll fees found for provided times. Toll times may be outside of toll hours.");
+                _logger.LogWarning("No toll fees found for provided times {@TollFeeTimes}", eligibleTollFeeTimes);
                 return ApplicationResult.NotFound<DailyTollFeesResult>(
-                    "No toll fees found for provided times. Toll times may be outside of toll hours.");
+                    "No toll fees found for provided times.");
             }
 
             return ApplicationResult.WithSuccess(new DailyTollFeesResult { TollFees = result });
