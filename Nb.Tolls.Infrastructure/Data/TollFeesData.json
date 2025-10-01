@@ -1,6 +1,4 @@
 {
-  "timezone": "Europe/Stockholm",
-  "semantics": "start-inclusive, end-exclusive; midnight span split into two rules",
   "TollFees": [
     { "start": "06:00", "end": "06:30", "startMin": 360,  "endMin": 390,  "amountSek": 8  },
     { "start": "06:30", "end": "07:00", "startMin": 390,  "endMin": 420,  "amountSek": 13 },
