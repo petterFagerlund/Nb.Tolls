@@ -124,7 +124,7 @@ public class TollFeesService : ITollFeesService
         return ApplicationResult.WithSuccess(dailyTollFeeResults);
     }
 
-    internal static List<decimal> CalculateDailyTollFees(IEnumerable<TollFeeResult> tollFeeResults)
+    internal List<decimal> CalculateDailyTollFees(IEnumerable<TollFeeResult> tollFeeResults)
     {
         var tollFeesPerDay = new List<decimal>();
         DateTime? previousTollTime = null;
