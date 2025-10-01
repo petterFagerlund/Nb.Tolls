@@ -85,7 +85,7 @@ public class TollFeesService : ITollFeesService
     }
 
     internal ApplicationResult<List<TollFeeResult>> CalculateTollFees(
-        List<DateTime> tollTimes)
+        IEnumerable<DateTime> tollTimes)
     {
         var tollFeesResult = _tollFeesRepository.GetTollFees(tollTimes);
         if (!tollFeesResult.IsSuccessful)
@@ -124,7 +124,7 @@ public class TollFeesService : ITollFeesService
         return ApplicationResult.WithSuccess(dailyTollFeeResults);
     }
 
-    internal List<decimal> CalculateDailyTollFees(List<TollFeeResult> tollFeeResults)
+    internal static List<decimal> CalculateDailyTollFees(IEnumerable<TollFeeResult> tollFeeResults)
     {
         var tollFeesPerDay = new List<decimal>();
         DateTime? previousTollTime = null;

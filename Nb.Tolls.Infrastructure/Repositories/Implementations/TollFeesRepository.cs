@@ -30,14 +30,14 @@ public class TollFeesRepository : ITollFeesRepository
         var results = new List<TollFeeResult>();
         try
         {
-            var stockholmTimeZone = TimeZoneInfo.FindSystemTimeZoneById(_timeZone);
+            var timeZone = TimeZoneInfo.FindSystemTimeZoneById(_timeZone);
             foreach (var dateTime in dateTimes)
             {
                 var utcTime = dateTime.Kind == DateTimeKind.Utc
                     ? dateTime
                     : DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
 
-                var localDateTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, stockholmTimeZone);
+                var localDateTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, timeZone);
                 var minuteOfDay = localDateTime.Hour * 60 + localDateTime.Minute;
 
                 var rule = _tollFees.FirstOrDefault(
