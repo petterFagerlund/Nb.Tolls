@@ -45,7 +45,7 @@ public class TollFeeController : ApiControllerBase
         }
 
         var result = applicationResult.Result!;
-        if (result.TollFees?.Count == 0)
+        if (result?.Count == 0)
         {
             _logger.LogInformation("No toll fees applicable for the provided data.");
             return NotFound("No toll fees applicable for the provided data.");

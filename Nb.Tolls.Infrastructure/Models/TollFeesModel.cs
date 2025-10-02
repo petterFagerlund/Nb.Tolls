@@ -1,6 +1,6 @@
 ﻿namespace Nb.Tolls.Infrastructure.Models;
 
-public class TollFeesModel
+public record TollFeesModel
 {
     public required string Start { get; init; }
     public required string End { get; init; }

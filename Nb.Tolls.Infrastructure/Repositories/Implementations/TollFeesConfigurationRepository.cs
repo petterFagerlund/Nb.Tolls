@@ -2,21 +2,21 @@
 using Microsoft.Extensions.Configuration;
 using Nb.Tolls.Infrastructure.Models;
 
-namespace Nb.Tolls.Infrastructure.Configuration;
+namespace Nb.Tolls.Infrastructure.Repositories.Implementations;
 
-public class TollFeesConfigurationLoader : ITollFeesConfigurationLoader
+public class TollFeesConfigurationRepository : ITollFeesConfigurationRepository
 {
     private readonly string _filePath;
     private readonly string _folder;
 
-    public TollFeesConfigurationLoader(IConfiguration configuration)
+    public TollFeesConfigurationRepository(IConfiguration configuration)
     {
         _filePath = configuration["TollSettings:TollFeesDataPath"] ??
                     throw new NullReferenceException("TollFeesDataPath configuration is missing");
         _folder = configuration["TollSettings:Folder"] ?? throw new NullReferenceException("Folder configuration is missing");
     }
 
-    public IReadOnlyList<TollFeesModel> LoadFromDataFolder()
+    public IReadOnlyList<TollFeesModel> GetTollFees()
     {
         var basePath = AppContext.BaseDirectory;
         var path = Path.Combine(basePath, _folder, _filePath);
@@ -26,19 +26,19 @@ public class TollFeesConfigurationLoader : ITollFeesConfigurationLoader
             throw new FileNotFoundException("Toll fees configuration file not found.", path);
         }
 
-        return LoadRules(path);
+        return GetTollFeeModels(path);
     }
 
-    public List<TollFeesModel> LoadRules(string path)
+    internal IReadOnlyList<TollFeesModel> GetTollFeeModels(string path)
     {
         var json = File.ReadAllText(path);
         var tollConfigurationModel =
-            JsonSerializer.Deserialize<TollFeeConfigData>(
+            JsonSerializer.Deserialize<List<TollFeesModel>>(
                 json,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ??
             throw new InvalidOperationException("Failed to load toll TollFees JSON.");
 
-        return tollConfigurationModel.TollFees
+        return tollConfigurationModel
             .Select(
                 tollFeeConfigResults => new TollFeesModel
                 {

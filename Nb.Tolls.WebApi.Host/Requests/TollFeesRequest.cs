@@ -4,6 +4,6 @@ namespace Nb.Tolls.WebApi.Host.Requests;
 
 public record TollFeesRequest
 {
-    public required Vehicle VehicleType { get; set; }
-    public required DateTimeOffset[] TollTimes { get; set; }
+    public required Vehicle VehicleType { get; init; }
+    public required DateTimeOffset[] TollTimes { get; init; }
 }

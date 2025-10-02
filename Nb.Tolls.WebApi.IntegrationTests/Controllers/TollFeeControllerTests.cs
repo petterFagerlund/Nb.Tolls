@@ -57,20 +57,17 @@ public class TollFeeControllerTests
             ]
         };
 
-        var applicationResult = new ApplicationResult<DailyTollFeesResult>
+        var applicationResult = new ApplicationResult<List<TollFeeResult>>
         {
-            Result = new DailyTollFeesResult
+            Result = new List<TollFeeResult>
             {
-                TollFees = new List<TollFeeResult>
-                {
-                    new() { TollFeeTime = new DateTime(2025, 9, 26), TollFee = 18 },
-                    new() { TollFeeTime = new DateTime(2025, 9, 29), TollFee = 52 },
-                    new() { TollFeeTime = new DateTime(2025, 9, 30), TollFee = 60 }
-                }
+                new() { TollFeeTime = new DateTime(2025, 9, 26), TollFee = 18 },
+                new() { TollFeeTime = new DateTime(2025, 9, 29), TollFee = 52 },
+                new() { TollFeeTime = new DateTime(2025, 9, 30), TollFee = 60 }
             }
         };
         A.CallTo(() => _hostSutApplication.TollFeesCalculatorService.CalculateTollFees(request.VehicleType, request.TollTimes))
-            .Returns(Task.FromResult(applicationResult));
+            .Returns(applicationResult);
 
         const string requestUri = "/api/tollfee";
         var jsonOptions = new JsonSerializerOptions
@@ -100,7 +97,7 @@ public class TollFeeControllerTests
         Assert.Equal(new DateOnly(2025, 9, 30), tollFeeResponse[2].TollDate);
         Assert.Equal(60, tollFeeResponse[2].TollFee);
     }
-    
+
     [Fact]
     public async Task GetTollFee_WhenServiceThrowsException_ReturnsInternalServerError()
     {

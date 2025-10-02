@@ -67,9 +67,9 @@ public class TollFeesCalculatorServiceTests
         // Assert
         Assert.True(result.IsSuccessful);
         Assert.NotNull(result.Result);
-        Assert.Single(result.Result.TollFees!);
+        Assert.Single(result.Result!);
 
-        var tollTimeFeeResult = result.Result.TollFees![0];
+        var tollTimeFeeResult = result.Result![0];
 
         Assert.Equal(DateOnly.FromDateTime(dateOne), DateOnly.FromDateTime(tollTimeFeeResult.TollFeeTime));
         Assert.Equal(25m, tollTimeFeeResult.TollFee);
@@ -115,10 +115,10 @@ public class TollFeesCalculatorServiceTests
         // Assert
         Assert.True(result.IsSuccessful);
         Assert.NotNull(result.Result);
-        Assert.True(result.Result.TollFees!.Count == 2);
+        Assert.True(result.Result!.Count == 2);
 
-        Assert.Equal(0m, result.Result.TollFees![1].TollFee);
-        Assert.Equal(0m, result.Result.TollFees![0].TollFee);
+        Assert.Equal(0m, result.Result![1].TollFee);
+        Assert.Equal(0m, result.Result![0].TollFee);
 
         A.CallTo(() => _tollTimeService.GetEligibleTollFeeTimes(A<List<DateTime>>._))
             .MustHaveHappenedOnceExactly();
@@ -270,9 +270,9 @@ public class TollFeesCalculatorServiceTests
         Assert.True(result.IsSuccessful);
         Assert.NotNull(result.Result);
 
-        Assert.Equal(2, result.Result.TollFees!.Count);
+        Assert.Equal(2, result.Result!.Count);
 
-        var total = result.Result.TollFees.Sum(x => x.TollFee);
+        var total = result.Result.Sum(x => x.TollFee);
         Assert.Equal(25m, total);
 
         A.CallTo(() => _tollTimeService.GetEligibleTollFeeTimes(A<List<DateTime>>._))

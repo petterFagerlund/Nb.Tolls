@@ -3,14 +3,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Nb.Tolls.Application.ApiClients;
 using Nb.Tolls.Application.Repositories;
 using Nb.Tolls.Infrastructure.ApiClients;
-using Nb.Tolls.Infrastructure.Configuration;
+using Nb.Tolls.Infrastructure.Repositories;
 using Nb.Tolls.Infrastructure.Repositories.Implementations;
 
 namespace Nb.Tolls.Infrastructure.Registrations;
 
 public static class ServiceCollectionsExtension
 {
-    public static IServiceCollection AddTollsInfrastructure(
+    public static void AddTollsInfrastructure(
         this IServiceCollection services,
         ConfigurationManager configuration)
     {
@@ -29,7 +29,6 @@ public static class ServiceCollectionsExtension
                 client.Timeout = TimeSpan.FromSeconds(60);
             });
         services.AddTransient<ITollFeesRepository, TollFeesRepository>();
-        services.AddTransient<ITollFeesConfigurationLoader, TollFeesConfigurationLoader>();
-        return services;
+        services.AddTransient<ITollFeesConfigurationRepository, TollFeesConfigurationRepository>();
     }
 }

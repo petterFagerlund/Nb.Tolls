@@ -64,7 +64,6 @@ Swagger (http://localhost:5000/api/norion/index.html) is configured for interact
 
 ## Project Structure
 
-- `Nb.Tolls.WebApi.Models` – Requests & Responses.
 - `Nb.Tolls.WebApi.Host` – API host project.
 - `Nb.Tolls.Application` – Application logic (services, helpers, etc.).
 - `Nb.Tolls.Infrastructure` – Data access and configuration loaders.

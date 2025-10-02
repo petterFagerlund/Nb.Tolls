@@ -2,8 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Nb.Tolls.Domain.Enums;
-using Nb.Tolls.Infrastructure.Configuration;
 using Nb.Tolls.Infrastructure.Models;
+using Nb.Tolls.Infrastructure.Repositories;
 using Nb.Tolls.Infrastructure.Repositories.Implementations;
 using Xunit;
 
@@ -24,8 +24,8 @@ public class TollFeesRepositoryTests
             new() { StartMin = 900, EndMin = 930, AmountSek = 13, Start = "15:00", End = "15:30" }
         };
 
-        var configurationLoader = A.Fake<ITollFeesConfigurationLoader>();
-        A.CallTo(() => configurationLoader.LoadFromDataFolder()).Returns(fakeTollFees);
+        var configurationLoader = A.Fake<ITollFeesConfigurationRepository>();
+        A.CallTo(() => configurationLoader.GetTollFees()).Returns(fakeTollFees);
 
         var configuration = A.Fake<IConfiguration>();
         A.CallTo(() => configuration["TollSettings:TimeZone"]).Returns("Europe/Stockholm");

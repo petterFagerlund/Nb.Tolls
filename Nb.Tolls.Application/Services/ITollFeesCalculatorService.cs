@@ -5,5 +5,5 @@ namespace Nb.Tolls.Application.Services;
 
 public interface ITollFeesCalculatorService
 {
-    Task<ApplicationResult<DailyTollFeesResult>> CalculateTollFees(Vehicle vehicleType, DateTimeOffset[] tollTimes);
+    Task<ApplicationResult<List<TollFeeResult>>> CalculateTollFees(Vehicle vehicleType, DateTimeOffset[] tollTimes);
 }

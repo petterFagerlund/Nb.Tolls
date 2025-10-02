@@ -5,9 +5,9 @@ namespace Nb.Tolls.WebApi.Host.Mappers;
 
 public static class TollFeesResponseMapper
 {
-    public static List<TollFeeResponse> Map(DailyTollFeesResult dailyTollFeesResult)
+    public static List<TollFeeResponse> Map(IEnumerable<TollFeeResult> tollFeeResults)
     {
-        return dailyTollFeesResult.TollFees!.Select(
+        return tollFeeResults.Select(
                 tollFee => new TollFeeResponse
                 {
                     TollDate = DateOnly.FromDateTime(tollFee.TollFeeTime), TollFee = tollFee.TollFee

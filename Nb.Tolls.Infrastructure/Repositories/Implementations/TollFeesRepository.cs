@@ -2,9 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Nb.Tolls.Application.Repositories;
 using Nb.Tolls.Domain.Results;
-using Nb.Tolls.Infrastructure.Configuration;
 using Nb.Tolls.Infrastructure.Models;
-
 
 namespace Nb.Tolls.Infrastructure.Repositories.Implementations;
 
@@ -15,12 +13,12 @@ public class TollFeesRepository : ITollFeesRepository
     private readonly string _timeZone;
 
     public TollFeesRepository(
-        ITollFeesConfigurationLoader tollFeesConfigurationLoader,
+        ITollFeesConfigurationRepository tollFeesConfigurationRepository,
         IConfiguration configuration,
         ILogger<TollFeesRepository> logger)
     {
         _logger = logger;
-        _tollFees = tollFeesConfigurationLoader.LoadFromDataFolder();
+        _tollFees = tollFeesConfigurationRepository.GetTollFees();
         _timeZone = configuration["TollSettings:TimeZone"] ??
                     throw new NullReferenceException("Timezone configuration is missing");
     }

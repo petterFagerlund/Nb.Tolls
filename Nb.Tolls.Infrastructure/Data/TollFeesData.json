@@ -1,15 +1,79 @@
-{
-  "TollFees": [
-    { "start": "06:00", "end": "06:30", "startMin": 360,  "endMin": 390,  "amountSek": 8  },
-    { "start": "06:30", "end": "07:00", "startMin": 390,  "endMin": 420,  "amountSek": 13 },
-    { "start": "07:00", "end": "08:00", "startMin": 420,  "endMin": 480,  "amountSek": 18 },
-    { "start": "08:00", "end": "08:30", "startMin": 480,  "endMin": 510,  "amountSek": 13 },
-    { "start": "08:30", "end": "15:00", "startMin": 510,  "endMin": 900,  "amountSek": 8  },
-    { "start": "15:00", "end": "15:30", "startMin": 900,  "endMin": 930,  "amountSek": 13 },
-    { "start": "15:30", "end": "17:00", "startMin": 930,  "endMin": 1020, "amountSek": 18 },
-    { "start": "17:00", "end": "18:00", "startMin": 1020, "endMin": 1080, "amountSek": 13 },
-    { "start": "18:00", "end": "18:30", "startMin": 1080, "endMin": 1110, "amountSek": 8  },
-    { "start": "18:30", "end": "24:00", "startMin": 1110, "endMin": 1440, "amountSek": 0  },
-    { "start": "00:00", "end": "06:00", "startMin": 0,    "endMin": 360,  "amountSek": 0  }
-  ]
-}
+[
+  {
+    "start": "06:00",
+    "end": "06:30",
+    "startMin": 360,
+    "endMin": 390,
+    "amountSek": 8
+  },
+  {
+    "start": "06:30",
+    "end": "07:00",
+    "startMin": 390,
+    "endMin": 420,
+    "amountSek": 13
+  },
+  {
+    "start": "07:00",
+    "end": "08:00",
+    "startMin": 420,
+    "endMin": 480,
+    "amountSek": 18
+  },
+  {
+    "start": "08:00",
+    "end": "08:30",
+    "startMin": 480,
+    "endMin": 510,
+    "amountSek": 13
+  },
+  {
+    "start": "08:30",
+    "end": "15:00",
+    "startMin": 510,
+    "endMin": 900,
+    "amountSek": 8
+  },
+  {
+    "start": "15:00",
+    "end": "15:30",
+    "startMin": 900,
+    "endMin": 930,
+    "amountSek": 13
+  },
+  {
+    "start": "15:30",
+    "end": "17:00",
+    "startMin": 930,
+    "endMin": 1020,
+    "amountSek": 18
+  },
+  {
+    "start": "17:00",
+    "end": "18:00",
+    "startMin": 1020,
+    "endMin": 1080,
+    "amountSek": 13
+  },
+  {
+    "start": "18:00",
+    "end": "18:30",
+    "startMin": 1080,
+    "endMin": 1110,
+    "amountSek": 8
+  },
+  {
+    "start": "18:30",
+    "end": "24:00",
+    "startMin": 1110,
+    "endMin": 1440,
+    "amountSek": 0
+  },
+  {
+    "start": "00:00",
+    "end": "06:00",
+    "startMin": 0,
+    "endMin": 360,
+    "amountSek": 0
+  }
+]

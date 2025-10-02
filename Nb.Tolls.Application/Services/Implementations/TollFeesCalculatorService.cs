@@ -22,13 +22,13 @@ public class TollFeesCalculatorService : ITollFeesCalculatorService
         _logger = logger;
     }
 
-    public async Task<ApplicationResult<DailyTollFeesResult>> CalculateTollFees(
+    public async Task<ApplicationResult<List<TollFeeResult>>> CalculateTollFees(
         Vehicle vehicleType,
         DateTimeOffset[] tollTimes)
     {
         if (VehicleTollPolicyHelper.IsTollFreeVehicle(vehicleType))
         {
-            return ApplicationResult.NotFound<DailyTollFeesResult>("Vehicle type is toll-free.");
+            return ApplicationResult.NotFound<List<TollFeeResult>>("Vehicle type is toll-free.");
         }
 
         var tollTimesUtc = tollTimes
@@ -41,7 +41,7 @@ public class TollFeesCalculatorService : ITollFeesCalculatorService
             _logger.LogInformation(
                 "No eligible toll fee times found after filtering: {@TollFeeTimes}",
                 eligibleTollFeeTimes);
-            return ApplicationResult.NotFound<DailyTollFeesResult>("No eligible toll fee times found after filtering.");
+            return ApplicationResult.NotFound<List<TollFeeResult>>("No eligible toll fee times found after filtering.");
         }
 
         var result = new List<TollFeeResult>();
@@ -69,11 +69,11 @@ public class TollFeesCalculatorService : ITollFeesCalculatorService
         if (result.Count == 0)
         {
             _logger.LogWarning("No toll fees found for provided times {@TollFeeTimes}", eligibleTollFeeTimes);
-            return ApplicationResult.NotFound<DailyTollFeesResult>(
+            return ApplicationResult.NotFound<List<TollFeeResult>>(
                 "No toll fees found for provided times.");
         }
 
-        return ApplicationResult.WithSuccess(new DailyTollFeesResult { TollFees = result });
+        return ApplicationResult.WithSuccess(result);
     }
 
     internal ApplicationResult<List<TollFeeResult>> CalculateTollFeesFromValidTollFeeTimes(
